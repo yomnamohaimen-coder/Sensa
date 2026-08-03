@@ -1,34 +1,8 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { DashboardWithReports } from "@/components/dashboard-with-reports";
 import { createClient } from "@/utils/supabase/server";
-import { HAS_REPORTS, MOCK_LAST_ANALYSIS } from "@/lib/mock-data";
-
-function TrendIndicator({
-  trend,
-  value,
-}: {
-  trend: "up" | "down" | "flat";
-  value: string;
-}) {
-  const styles = {
-    up: "text-emerald-600",
-    down: "text-red-600",
-    flat: "text-zinc-500",
-  };
-
-  const arrows = {
-    up: "↑",
-    down: "↓",
-    flat: "→",
-  };
-
-  return (
-    <span className={`inline-flex items-center gap-1 text-sm font-medium ${styles[trend]}`}>
-      <span aria-hidden="true">{arrows[trend]}</span>
-      {value}
-    </span>
-  );
-}
+import { HAS_REPORTS } from "@/lib/mock-data";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -55,28 +29,15 @@ export default async function DashboardPage() {
         </h1>
       </header>
 
-      <div className="mb-8">
-        {HAS_REPORTS ? (
-          <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-            <p className="text-sm text-zinc-500">
-              Last updated: {MOCK_LAST_ANALYSIS.updatedAt}
-            </p>
-            <p className="mt-3 text-base text-zinc-800">
-              {MOCK_LAST_ANALYSIS.summary}
-            </p>
-            <div className="mt-4">
-              <TrendIndicator
-                trend={MOCK_LAST_ANALYSIS.trend}
-                value={MOCK_LAST_ANALYSIS.trendValue}
-              />
-            </div>
-          </div>
-        ) : (
+      {HAS_REPORTS ? (
+        <DashboardWithReports />
+      ) : (
+        <div className="mb-8">
           <p className="text-base text-zinc-600">
             You haven&apos;t run an analysis yet — start with your first upload.
           </p>
-        )}
-      </div>
+        </div>
+      )}
 
       <Link
         href="/upload"
