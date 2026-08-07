@@ -1,20 +1,31 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { MOCK_REPORTS } from "@/lib/mock-data";
+import { useRouter } from "next/navigation";
 import { ReportView } from "@/components/report-view";
+import { StartAnalysisUpload } from "@/components/start-analysis-upload";
+import type { ReportDisplay } from "@/lib/reports/build-report-display";
 
-export function ReportsPageContent() {
-  const [selectedReportId, setSelectedReportId] = useState(MOCK_REPORTS[0].id);
+type ReportsPageContentProps = {
+  reports: ReportDisplay[];
+  initialSelectedReportId?: string;
+};
+
+export function ReportsPageContent({
+  reports,
+  initialSelectedReportId,
+}: ReportsPageContentProps) {
+  const router = useRouter();
+  const [selectedReportId, setSelectedReportId] = useState(
+    initialSelectedReportId ?? reports[0]?.id ?? "",
+  );
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const selectedReport =
-    MOCK_REPORTS.find((report) => report.id === selectedReportId) ??
-    MOCK_REPORTS[0];
+  const selectedReport = reports.find((report) => report.id === selectedReportId);
 
   const filteredReports = useMemo(() => {
-    return MOCK_REPORTS.filter((report) => {
+    return reports.filter((report) => {
       if (startDate && report.dateISO < startDate) {
         return false;
       }
@@ -23,7 +34,14 @@ export function ReportsPageContent() {
       }
       return true;
     });
-  }, [startDate, endDate]);
+  }, [reports, startDate, endDate]);
+
+  function handleSelectReport(reportId: string) {
+    setSelectedReportId(reportId);
+    router.replace(`/reports?report=${reportId}`, { scroll: false });
+  }
+
+  const isMostRecent = reports[0]?.id === selectedReport?.id;
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col px-6 py-10">
@@ -34,15 +52,26 @@ export function ReportsPageContent() {
         <p className="mt-2 text-sm text-zinc-500">
           View analysis results and browse past reports
         </p>
+        <div className="mt-6">
+          <StartAnalysisUpload />
+        </div>
       </header>
 
       <div className="mb-12">
-        <p className="mb-4 text-xs font-medium uppercase tracking-wide text-zinc-400">
-          {selectedReport.id === MOCK_REPORTS[0].id
-            ? "Most recent report"
-            : "Selected report"}
-        </p>
-        <ReportView report={selectedReport} />
+        {selectedReport ? (
+          <>
+            <p className="mb-4 text-xs font-medium uppercase tracking-wide text-zinc-400">
+              {isMostRecent ? "Most recent report" : "Selected report"}
+            </p>
+            <ReportView report={selectedReport} />
+          </>
+        ) : (
+          <div className="rounded-lg border border-dashed border-zinc-200 bg-white px-6 py-10 text-center">
+            <p className="text-sm text-zinc-600">
+              No reports yet. Upload a CSV to generate your first analysis.
+            </p>
+          </div>
+        )}
       </div>
 
       <section className="border-t border-zinc-200 pt-10">
@@ -95,11 +124,9 @@ export function ReportsPageContent() {
                 <li key={report.id}>
                   <button
                     type="button"
-                    onClick={() => setSelectedReportId(report.id)}
+                    onClick={() => handleSelectReport(report.id)}
                     className={`flex w-full items-center justify-between px-5 py-4 text-left transition-colors ${
-                      isSelected
-                        ? "bg-zinc-100"
-                        : "hover:bg-zinc-50"
+                      isSelected ? "bg-zinc-100" : "hover:bg-zinc-50"
                     }`}
                   >
                     <span className="text-sm font-medium text-zinc-900">
@@ -112,7 +139,9 @@ export function ReportsPageContent() {
             })
           ) : (
             <li className="px-5 py-8 text-center text-sm text-zinc-500">
-              No reports match this date range.
+              {reports.length === 0
+                ? "No reports yet."
+                : "No reports match this date range."}
             </li>
           )}
         </ul>

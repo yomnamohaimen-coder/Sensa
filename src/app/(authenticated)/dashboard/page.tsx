@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { DashboardWithReports } from "@/components/dashboard-with-reports";
+import { StartAnalysisUpload } from "@/components/start-analysis-upload";
 import { createClient } from "@/utils/supabase/server";
 import { HAS_REPORTS } from "@/lib/mock-data";
 
@@ -39,12 +39,7 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      <Link
-        href="/upload"
-        className="inline-flex w-fit items-center justify-center rounded-md bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
-      >
-        Start new analysis
-      </Link>
+      <StartAnalysisUpload />
 
       <p className="mt-16 text-sm text-zinc-400">
         More insights and comparisons coming soon
