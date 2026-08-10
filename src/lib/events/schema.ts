@@ -40,7 +40,8 @@ export type DbReport = {
 
 export type DbEvent = ParsedEventRow & {
   id: string;
-  report_id: string;
+  report_id: string | null;
   user_id: string;
+  source: ReportSource;
   created_at: string;
 };

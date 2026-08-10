@@ -29,6 +29,7 @@ async function insertEventsInBatches(
       page: event.page,
       device: event.device,
       metadata: event.metadata,
+      source: "manual_upload" as const,
     }));
 
     const { error } = await supabase.from("events").insert(batch);
