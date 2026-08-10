@@ -14,6 +14,17 @@ type TrackBody = {
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Max-Age": "86400",
+};
+
+function jsonResponse(body: Record<string, unknown>, status: number) {
+  return NextResponse.json(body, { status, headers: CORS_HEADERS });
+}
+
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
@@ -70,21 +81,22 @@ function parseBody(body: TrackBody) {
   };
 }
 
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function POST(request: Request) {
   let json: TrackBody;
 
   try {
     json = (await request.json()) as TrackBody;
   } catch {
-    return NextResponse.json(
-      { error: "Request body must be valid JSON." },
-      { status: 400 },
-    );
+    return jsonResponse({ error: "Request body must be valid JSON." }, 400);
   }
 
   const parsed = parseBody(json);
   if ("error" in parsed) {
-    return NextResponse.json({ error: parsed.error }, { status: 400 });
+    return jsonResponse({ error: parsed.error }, 400);
   }
 
   let supabase;
@@ -92,10 +104,7 @@ export async function POST(request: Request) {
     supabase = createServiceClient();
   } catch (error) {
     console.error("Track endpoint misconfigured:", error);
-    return NextResponse.json(
-      { error: "Tracking endpoint is not configured." },
-      { status: 500 },
-    );
+    return jsonResponse({ error: "Tracking endpoint is not configured." }, 500);
   }
 
   try {
@@ -107,17 +116,11 @@ export async function POST(request: Request) {
 
     if (profileError) {
       console.error("Failed to look up tracking_id:", profileError);
-      return NextResponse.json(
-        { error: "Could not validate tracking ID." },
-        { status: 500 },
-      );
+      return jsonResponse({ error: "Could not validate tracking ID." }, 500);
     }
 
     if (!profile) {
-      return NextResponse.json(
-        { error: "Invalid tracking ID." },
-        { status: 401 },
-      );
+      return jsonResponse({ error: "Invalid tracking ID." }, 401);
     }
 
     const { data: event, error: insertError } = await supabase
@@ -138,26 +141,23 @@ export async function POST(request: Request) {
 
     if (insertError || !event) {
       console.error("Failed to insert tracked event:", insertError);
-      return NextResponse.json(
-        { error: "Could not store event." },
-        { status: 500 },
-      );
+      return jsonResponse({ error: "Could not store event." }, 500);
     }
 
-    return NextResponse.json({ ok: true, event_id: event.id }, { status: 201 });
+    return jsonResponse({ ok: true, event_id: event.id }, 201);
   } catch (error) {
     const timedOut =
       error instanceof Error &&
       (error.name === "TimeoutError" || error.name === "AbortError");
 
     console.error("Track endpoint failed:", error);
-    return NextResponse.json(
+    return jsonResponse(
       {
         error: timedOut
           ? "Database request timed out."
           : "Could not store event.",
       },
-      { status: timedOut ? 504 : 500 },
+      timedOut ? 504 : 500,
     );
   }
 }
