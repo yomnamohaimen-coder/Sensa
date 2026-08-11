@@ -126,6 +126,33 @@
       }
     }
 
+    function track(eventType, metadata) {
+      try {
+        if (typeof eventType !== "string" || !eventType.trim()) {
+          return;
+        }
+
+        if (
+          metadata !== undefined &&
+          metadata !== null &&
+          (typeof metadata !== "object" || Array.isArray(metadata))
+        ) {
+          return;
+        }
+
+        send(eventType.trim(), metadata == null ? null : metadata);
+      } catch (error) {
+        // Fail silently.
+      }
+    }
+
+    try {
+      window.sensa = window.sensa || {};
+      window.sensa.track = track;
+    } catch (error) {
+      // Fail silently if window is not writable.
+    }
+
     send("page_view", {
       title: document.title || null,
       referrer: document.referrer || null,
