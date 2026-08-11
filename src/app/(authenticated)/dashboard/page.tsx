@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { DashboardWithReports } from "@/components/dashboard-with-reports";
+import { RecurringAnalysisChecker } from "@/components/recurring-analysis-checker";
 import { StartAnalysisUpload } from "@/components/start-analysis-upload";
 import { createClient } from "@/utils/supabase/server";
 import { HAS_REPORTS } from "@/lib/mock-data";
@@ -28,6 +29,8 @@ export default async function DashboardPage() {
           {welcomeMessage}
         </h1>
       </header>
+
+      <RecurringAnalysisChecker />
 
       {HAS_REPORTS ? (
         <DashboardWithReports />

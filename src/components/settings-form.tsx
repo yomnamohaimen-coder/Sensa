@@ -57,7 +57,12 @@ export function SettingsForm({ initialProductName }: SettingsFormProps) {
       onSubmit={handleSubmit}
       className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm"
     >
-      <div>
+      <h2 className="text-base font-semibold text-zinc-900">Product</h2>
+      <p className="mt-1 text-sm text-zinc-500">
+        This name appears in your dashboard welcome message.
+      </p>
+
+      <div className="mt-5">
         <label
           htmlFor="product-name"
           className="mb-1.5 block text-sm font-medium text-zinc-700"

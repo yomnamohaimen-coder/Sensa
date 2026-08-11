@@ -1,4 +1,6 @@
 import { cookies } from "next/headers";
+import { AnalysisIntervalForm } from "@/components/analysis-interval-form";
+import { ChangePasswordForm } from "@/components/change-password-form";
 import { SettingsForm } from "@/components/settings-form";
 import { createClient } from "@/utils/supabase/server";
 
@@ -12,9 +14,16 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("product_name")
+    .select("product_name, analysis_interval_days, analysis_manual_only")
     .eq("id", user!.id)
     .maybeSingle();
+
+  const intervalDays =
+    typeof profile?.analysis_interval_days === "number" &&
+    profile.analysis_interval_days >= 1
+      ? profile.analysis_interval_days
+      : null;
+  const manualOnly = profile?.analysis_manual_only !== false;
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col px-6 py-10">
@@ -27,7 +36,14 @@ export default async function SettingsPage() {
         </p>
       </header>
 
-      <SettingsForm initialProductName={profile?.product_name?.trim() ?? ""} />
+      <div className="flex flex-col gap-6">
+        <SettingsForm initialProductName={profile?.product_name?.trim() ?? ""} />
+        <AnalysisIntervalForm
+          initialIntervalDays={intervalDays}
+          initialManualOnly={manualOnly}
+        />
+        <ChangePasswordForm />
+      </div>
     </div>
   );
 }
