@@ -8,6 +8,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/reports", label: "Reports" },
   { href: "/connect", label: "Connect" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export function AppSidebar() {
