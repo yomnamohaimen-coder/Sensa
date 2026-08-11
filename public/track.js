@@ -179,6 +179,8 @@
           send("click", {
             x: typeof event.pageX === "number" ? event.pageX : null,
             y: typeof event.pageY === "number" ? event.pageY : null,
+            viewportWidth: window.innerWidth || null,
+            viewportHeight: window.innerHeight || null,
             tag: String(target.tagName).toLowerCase(),
             id: target.id || null,
             text: clickLabel(target) || null,
