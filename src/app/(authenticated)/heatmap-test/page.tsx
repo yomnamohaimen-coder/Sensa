@@ -1,7 +1,7 @@
 import { ListingPageHeatmap } from "@/components/heatmap/listing-page-heatmap";
 
 /** Temporary visual QA page — remove after heatmap wiring is confirmed. */
-const TEST_REPORT_ID = "c42d33ca-1fd0-4a15-a4ff-3c8d34f04e21";
+const TEST_REPORT_ID = "8192d36a-2a55-46a1-8a21-041a79b1f735";
 
 export default function HeatmapTestPage() {
   return (

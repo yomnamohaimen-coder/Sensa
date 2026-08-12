@@ -21,12 +21,14 @@ type ListingPageHeatmapProps = {
 const DEFAULT_RADIUS = 55;
 const DEFAULT_OPACITY = 0.8;
 
-/** Warm, high-contrast gradient for light gray wireframe backgrounds. */
+/** Classic full-spectrum heatmap scale (Amplitude/Hotjar-style). */
 const HEATMAP_GRADIENT: GradientMap = {
-  0: "#fde047", // yellow (low density)
-  0.45: "#fb923c", // orange
-  0.75: "#f97316", // deep orange
-  1: "#dc2626", // red (high density)
+  0: "#3b82f6", // blue (low density)
+  0.25: "#22d3ee", // cyan/teal
+  0.5: "#4ade80", // green
+  0.7: "#fde047", // yellow
+  0.85: "#fb923c", // orange
+  1: "#dc2626", // red (highest density)
 };
 
 function documentPoint(event: CaptureEvent): { x: number; y: number } | null {
