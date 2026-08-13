@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   useHeatmapData,
   type CaptureEvent,
@@ -188,8 +188,10 @@ export function ListingPageHeatmap({
   reportId,
   page = "/listing/42",
 }: ListingPageHeatmapProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
+  const fitRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [nativeHeight, setNativeHeight] = useState(0);
 
   const adapter = useMemo(
     () => createSensaHeatmapAdapter(reportId),
@@ -209,64 +211,117 @@ export function ListingPageHeatmap({
 
   const { data, isLoading, error } = useHeatmapData(adapter, query);
   const hasEvents = data.length > 0;
+  const isMeasured = nativeHeight > 0;
 
-  useEffect(() => {
-    const node = containerRef.current;
-    if (!node) {
+  useLayoutEffect(() => {
+    const fit = fitRef.current;
+    const measure = measureRef.current;
+    if (!fit || !measure) {
       return;
     }
 
-    const updateHeight = () => {
-      setHeight(node.getBoundingClientRect().height);
+    let rafId = 0;
+
+    const update = () => {
+      const availableWidth = fit.clientWidth;
+      const nextScale =
+        availableWidth > 0
+          ? Math.min(1, availableWidth / LISTING_WIREFRAME_WIDTH)
+          : 1;
+      const nextHeight = Math.max(measure.scrollHeight, measure.offsetHeight);
+
+      setScale(nextScale);
+      if (nextHeight > 0) {
+        setNativeHeight(nextHeight);
+      }
+      return nextHeight;
     };
 
-    updateHeight();
+    const height = update();
+    if (height === 0) {
+      rafId = requestAnimationFrame(() => {
+        update();
+      });
+    }
 
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(node);
-    return () => observer.disconnect();
+    const observer = new ResizeObserver(() => {
+      update();
+    });
+    observer.observe(fit);
+    observer.observe(measure);
+
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
+  const scaledHeight = isMeasured
+    ? Math.ceil(nativeHeight * scale)
+    : undefined;
+
   return (
-    <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-zinc-50">
+    <div
+      ref={fitRef}
+      className="w-full overflow-x-hidden rounded-lg border border-zinc-200 bg-zinc-50"
+    >
       <div
-        ref={containerRef}
-        className="relative"
-        style={{ width: LISTING_WIREFRAME_WIDTH }}
+        className="w-full"
+        style={{
+          position: "relative",
+          height: scaledHeight,
+        }}
       >
-        <ListingPageWireframe />
-
-        {isLoading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
-            <p className="text-sm text-zinc-600">Loading heatmap…</p>
+        {/*
+          Until the first non-zero measure, keep the stage in normal flow so
+          ListingPageWireframe can contribute real height. Absolute + empty
+          spacer collapses the measure target and sticks nativeHeight at 0.
+        */}
+        <div
+          className={isMeasured ? "absolute top-0 left-0" : "relative"}
+          style={{
+            width: LISTING_WIREFRAME_WIDTH,
+            height: isMeasured ? nativeHeight : undefined,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          <div ref={measureRef}>
+            <ListingPageWireframe />
           </div>
-        )}
 
-        {!isLoading && error && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 px-6">
-            <p className="text-center text-sm text-red-600">
-              Could not load heatmap data. Please try again.
-            </p>
-          </div>
-        )}
+          {isLoading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
+              <p className="text-sm text-zinc-600">Loading heatmap…</p>
+            </div>
+          )}
 
-        {!isLoading && !error && !hasEvents && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 px-6">
-            <p className="text-center text-sm text-zinc-600">
-              Not enough click data yet
-            </p>
-          </div>
-        )}
+          {!isLoading && error && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 px-6">
+              <p className="text-center text-sm text-red-600">
+                Could not load heatmap data. Please try again.
+              </p>
+            </div>
+          )}
 
-        {!isLoading && !error && hasEvents && height > 0 && (
-          <ContainedDocumentHeatmap
-            events={data}
-            width={LISTING_WIREFRAME_WIDTH}
-            height={height}
-            radius={DEFAULT_RADIUS}
-            opacity={DEFAULT_OPACITY}
-          />
-        )}
+          {!isLoading && !error && !hasEvents && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 px-6">
+              <p className="text-center text-sm text-zinc-600">
+                Not enough click data yet
+              </p>
+            </div>
+          )}
+
+          {!isLoading && !error && hasEvents && isMeasured && (
+            <ContainedDocumentHeatmap
+              events={data}
+              width={LISTING_WIREFRAME_WIDTH}
+              height={nativeHeight}
+              radius={DEFAULT_RADIUS}
+              opacity={DEFAULT_OPACITY}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import { ListingPageHeatmap } from "@/components/heatmap/listing-page-heatmap";
 import type { ReportDisplay } from "@/lib/reports/build-report-display";
 
 function Section({
@@ -120,11 +121,44 @@ export function ReportView({ report }: { report: ReportDisplay }) {
       </Section>
 
       <Section title="Heatmap">
-        <div className="flex h-40 items-center justify-center rounded-md border border-dashed border-zinc-200 bg-zinc-50">
-          <p className="max-w-sm px-4 text-center text-sm text-zinc-500">
-            {report.heatmapDescription}
-          </p>
-        </div>
+        {report.heatmapStats.totalClicks === 0 ? (
+          <p className="text-sm text-zinc-500">Not enough click data yet</p>
+        ) : (
+          <div className="space-y-4">
+            <ListingPageHeatmap reportId={report.id} />
+
+            <div className="rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3">
+              <p className="text-sm font-medium text-zinc-900">
+                {report.heatmapStats.totalClicks.toLocaleString()} clicks
+              </p>
+              {report.heatmapStats.topElements.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+                    Top clicked elements
+                  </p>
+                  <ol className="mt-2 space-y-1.5">
+                    {report.heatmapStats.topElements.map((item, index) => (
+                      <li
+                        key={item.label}
+                        className="flex items-center justify-between text-sm text-zinc-700"
+                      >
+                        <span>
+                          <span className="mr-2 text-zinc-400">{index + 1}.</span>
+                          <code className="rounded bg-white px-1.5 py-0.5 text-xs text-zinc-800">
+                            {item.label}
+                          </code>
+                        </span>
+                        <span className="tabular-nums text-zinc-500">
+                          {item.count.toLocaleString()}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </Section>
 
       <Section title="AI insights">

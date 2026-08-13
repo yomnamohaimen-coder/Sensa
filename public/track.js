@@ -12,21 +12,34 @@
       return;
     }
 
-    var endpoint = resolveEndpoint(scriptEl.src);
+    var endpoint = resolveEndpoint(scriptEl.src, "/api/track");
+    var snapshotEndpoint = resolveEndpoint(scriptEl.src, "/api/snapshot");
+    // Same origin as track.js so host-site CSP that allows Sensa still works.
+    var html2canvasSrc = resolveEndpoint(scriptEl.src, "/html2canvas.min.js");
     if (!endpoint) {
       return;
     }
 
     var SESSION_KEY = "sensa_sid";
+    // Only written after a successful /api/snapshot response.
+    var SNAPSHOT_KEY_PREFIX = "sensa_snap_ok:";
+    var SNAPSHOT_SETTLE_MS = 1000;
+    var JPEG_QUALITY = 0.72;
+    var HTML2CANVAS_TIMEOUT_MS = 12000;
+    var IMAGE_TIMEOUT_MS = 1500;
+    var TOBLOB_TIMEOUT_MS = 4000;
+    var MAX_CANVAS_EDGE = 4096;
+    var MAX_CANVAS_AREA = 12 * 1024 * 1024;
+    var captureInFlight = false;
 
-    function resolveEndpoint(scriptSrc) {
+    function resolveEndpoint(scriptSrc, apiPath) {
       if (!scriptSrc) {
         return null;
       }
 
       try {
         var url = new URL(scriptSrc, window.location.href);
-        url.pathname = url.pathname.replace(/\/track\.js$/i, "/api/track");
+        url.pathname = url.pathname.replace(/\/track\.js$/i, apiPath);
         url.search = "";
         url.hash = "";
         return url.toString();
@@ -146,12 +159,406 @@
       }
     }
 
+    function clearLegacySnapshotMarks() {
+      try {
+        var keysToRemove = [];
+        for (var i = 0; i < sessionStorage.length; i++) {
+          var key = sessionStorage.key(i);
+          if (key && key.indexOf("sensa_snap:") === 0) {
+            keysToRemove.push(key);
+          }
+        }
+        for (var j = 0; j < keysToRemove.length; j++) {
+          sessionStorage.removeItem(keysToRemove[j]);
+        }
+      } catch (error) {
+        // Fail silently.
+      }
+    }
+
+    function hasCapturedPage(page) {
+      try {
+        return sessionStorage.getItem(SNAPSHOT_KEY_PREFIX + page) === "1";
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function markCapturedPage(page) {
+      try {
+        sessionStorage.setItem(SNAPSHOT_KEY_PREFIX + page, "1");
+      } catch (error) {
+        // Fail silently.
+      }
+    }
+
+    /**
+     * Strip media/backgrounds from the html2canvas clone so rendering cannot
+     * hang on CORS / never-loading remote assets (common on listing pages).
+     */
+    function sanitizeClone(clonedDoc) {
+      try {
+        var root = clonedDoc.documentElement || clonedDoc.body;
+        if (!root) {
+          return;
+        }
+
+        var media = root.querySelectorAll(
+          "img, source, video, iframe, object, embed",
+        );
+        for (var i = 0; i < media.length; i++) {
+          var el = media[i];
+          var tag = String(el.tagName || "").toUpperCase();
+          if (
+            tag === "IFRAME" ||
+            tag === "VIDEO" ||
+            tag === "OBJECT" ||
+            tag === "EMBED"
+          ) {
+            if (el.parentNode) {
+              el.parentNode.removeChild(el);
+            }
+            continue;
+          }
+          try {
+            el.removeAttribute("src");
+            el.removeAttribute("srcset");
+            el.removeAttribute("crossorigin");
+            el.style.background = "#d4d4d8";
+          } catch (error) {
+            // Continue sanitizing.
+          }
+        }
+
+        var all = root.querySelectorAll("*");
+        for (var j = 0; j < all.length; j++) {
+          var node = all[j];
+          try {
+            // Clear class-based and inline background images (listing heroes, etc.).
+            node.style.setProperty("background-image", "none", "important");
+          } catch (error) {
+            // Continue sanitizing.
+          }
+        }
+      } catch (error) {
+        // Fail silently — capture may still succeed.
+      }
+    }
+
+    function computeScale(target) {
+      var width = Math.max(
+        target.scrollWidth || 0,
+        target.clientWidth || 0,
+        document.documentElement ? document.documentElement.clientWidth : 0,
+        1,
+      );
+      var height = Math.max(
+        target.scrollHeight || 0,
+        target.clientHeight || 0,
+        1,
+      );
+      var scale = Math.min(
+        1,
+        MAX_CANVAS_EDGE / width,
+        MAX_CANVAS_EDGE / height,
+        Math.sqrt(MAX_CANVAS_AREA / (width * height)),
+      );
+      if (!isFinite(scale) || scale <= 0) {
+        return 1;
+      }
+      return scale;
+    }
+
+    function loadHtml2Canvas(callback) {
+      try {
+        if (!html2canvasSrc) {
+          return;
+        }
+
+        var called = false;
+        function done(fn) {
+          if (called || typeof fn !== "function") {
+            return;
+          }
+          called = true;
+          callback(fn);
+        }
+
+        if (typeof window.html2canvas === "function") {
+          done(window.html2canvas);
+          return;
+        }
+
+        var existing = document.querySelector(
+          'script[data-sensa-html2canvas="1"]',
+        );
+        if (!existing) {
+          var script = document.createElement("script");
+          script.async = true;
+          script.setAttribute("data-sensa-html2canvas", "1");
+          // Attach handlers before src to avoid missing cached load events.
+          script.onload = function () {
+            done(window.html2canvas);
+          };
+          script.onerror = function () {};
+          script.src = html2canvasSrc;
+          (document.head || document.documentElement).appendChild(script);
+        } else {
+          existing.addEventListener("load", function () {
+            done(window.html2canvas);
+          });
+        }
+
+        // Polling fallback if load already fired before listeners attached.
+        var polls = 0;
+        var pollId = setInterval(function () {
+          polls += 1;
+          if (typeof window.html2canvas === "function") {
+            clearInterval(pollId);
+            done(window.html2canvas);
+          } else if (polls >= 100) {
+            clearInterval(pollId);
+          }
+        }, 50);
+      } catch (error) {
+        // Fail silently.
+      }
+    }
+
+    function dataUrlToBlob(canvas) {
+      var dataUrl = canvas.toDataURL("image/jpeg", JPEG_QUALITY);
+      var parts = dataUrl.split(",");
+      var mimeMatch = parts[0] && parts[0].match(/:(.*?);/);
+      var mime = (mimeMatch && mimeMatch[1]) || "image/jpeg";
+      var binary = atob(parts[1] || "");
+      var len = binary.length;
+      var bytes = new Uint8Array(len);
+      for (var i = 0; i < len; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return new Blob([bytes], { type: mime });
+    }
+
+    function canvasToJpegBlob(canvas, callback) {
+      var settled = false;
+      function finish(blob) {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        callback(blob || null);
+      }
+
+      var timer = setTimeout(function () {
+        try {
+          finish(dataUrlToBlob(canvas));
+        } catch (error) {
+          finish(null);
+        }
+      }, TOBLOB_TIMEOUT_MS);
+
+      try {
+        if (typeof canvas.toBlob === "function") {
+          canvas.toBlob(
+            function (blob) {
+              clearTimeout(timer);
+              if (blob) {
+                finish(blob);
+                return;
+              }
+              try {
+                finish(dataUrlToBlob(canvas));
+              } catch (error) {
+                finish(null);
+              }
+            },
+            "image/jpeg",
+            JPEG_QUALITY,
+          );
+          return;
+        }
+        clearTimeout(timer);
+        finish(dataUrlToBlob(canvas));
+      } catch (error) {
+        clearTimeout(timer);
+        try {
+          finish(dataUrlToBlob(canvas));
+        } catch (fallbackError) {
+          finish(null);
+        }
+      }
+    }
+
+    function uploadSnapshot(page, blob, width, height) {
+      if (!snapshotEndpoint || !blob) {
+        return;
+      }
+
+      try {
+        var form = new FormData();
+        form.append("tracking_id", trackingId);
+        form.append("page", page);
+        form.append("image", blob, "snapshot.jpg");
+        form.append("width", String(width));
+        form.append("height", String(height));
+
+        fetch(snapshotEndpoint, {
+          method: "POST",
+          body: form,
+          mode: "cors",
+          credentials: "omit",
+        })
+          .then(function (response) {
+            if (response && response.ok) {
+              markCapturedPage(page);
+            }
+          })
+          .catch(function () {});
+      } catch (error) {
+        // Fail silently.
+      }
+    }
+
+    function runHtml2Canvas(html2canvas, target) {
+      var scale = computeScale(target);
+      var render = html2canvas(target, {
+        logging: false,
+        // Do not attempt CORS image loads — sanitizeClone removes remote media.
+        // allowTaint:false keeps the canvas exportable via toBlob/toDataURL.
+        useCORS: false,
+        allowTaint: false,
+        imageTimeout: IMAGE_TIMEOUT_MS,
+        scale: scale,
+        removeContainer: true,
+        onclone: function (clonedDoc) {
+          sanitizeClone(clonedDoc);
+        },
+        ignoreElements: function (el) {
+          if (!el || !el.tagName) {
+            return false;
+          }
+          var tag = String(el.tagName).toUpperCase();
+          return (
+            tag === "IFRAME" ||
+            tag === "VIDEO" ||
+            tag === "OBJECT" ||
+            tag === "EMBED" ||
+            tag === "SCRIPT" ||
+            tag === "NOSCRIPT"
+          );
+        },
+      });
+
+      if (!render || typeof render.then !== "function") {
+        return Promise.reject(new Error("html2canvas did not return a promise"));
+      }
+
+      return new Promise(function (resolve, reject) {
+        var settled = false;
+        var timer = setTimeout(function () {
+          if (!settled) {
+            settled = true;
+            reject(new Error("html2canvas timed out"));
+          }
+        }, HTML2CANVAS_TIMEOUT_MS);
+
+        render.then(
+          function (canvas) {
+            if (settled) {
+              return;
+            }
+            settled = true;
+            clearTimeout(timer);
+            resolve(canvas);
+          },
+          function (error) {
+            if (settled) {
+              return;
+            }
+            settled = true;
+            clearTimeout(timer);
+            reject(error);
+          },
+        );
+      });
+    }
+
+    function capturePageSnapshot() {
+      try {
+        if (!snapshotEndpoint || !html2canvasSrc || captureInFlight) {
+          return;
+        }
+
+        var page = getPage();
+        if (hasCapturedPage(page)) {
+          return;
+        }
+
+        captureInFlight = true;
+
+        loadHtml2Canvas(function (html2canvas) {
+          try {
+            var target = document.body || document.documentElement;
+            if (!target || typeof html2canvas !== "function") {
+              captureInFlight = false;
+              return;
+            }
+
+            runHtml2Canvas(html2canvas, target)
+              .then(function (canvas) {
+                try {
+                  if (!canvas || !canvas.width || !canvas.height) {
+                    captureInFlight = false;
+                    return;
+                  }
+
+                  canvasToJpegBlob(canvas, function (blob) {
+                    captureInFlight = false;
+                    if (!blob) {
+                      return;
+                    }
+                    uploadSnapshot(page, blob, canvas.width, canvas.height);
+                  });
+                } catch (error) {
+                  captureInFlight = false;
+                }
+              })
+              .catch(function () {
+                captureInFlight = false;
+              });
+          } catch (error) {
+            captureInFlight = false;
+          }
+        });
+      } catch (error) {
+        captureInFlight = false;
+      }
+    }
+
+    function schedulePageSnapshot() {
+      try {
+        function run() {
+          setTimeout(capturePageSnapshot, SNAPSHOT_SETTLE_MS);
+        }
+
+        if (document.readyState === "complete") {
+          run();
+        } else {
+          window.addEventListener("load", run);
+        }
+      } catch (error) {
+        // Fail silently.
+      }
+    }
+
     try {
       window.sensa = window.sensa || {};
       window.sensa.track = track;
     } catch (error) {
       // Fail silently if window is not writable.
     }
+
+    clearLegacySnapshotMarks();
 
     send("page_view", {
       title: document.title || null,
@@ -167,7 +574,6 @@
             return;
           }
 
-          // Prefer the nearest element node if a text node was clicked.
           if (target.nodeType === 3 && target.parentElement) {
             target = target.parentElement;
           }
@@ -191,6 +597,8 @@
       },
       true,
     );
+
+    schedulePageSnapshot();
   } catch (error) {
     // Fail silently.
   }

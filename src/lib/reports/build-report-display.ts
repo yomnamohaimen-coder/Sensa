@@ -1,10 +1,11 @@
 import { calculateReportMetrics } from "@/lib/analytics/calculate-report-metrics";
 import type { CalculatedReportMetrics } from "@/lib/analytics/calculate-report-metrics";
 import type { DbReport } from "@/lib/events/schema";
-import { MOCK_REPORTS } from "@/lib/mock-data";
 import { getReportEvents } from "@/lib/reports/get-report-events";
-
-const PLACEHOLDER_HEATMAP = MOCK_REPORTS[0].heatmapDescription;
+import {
+  getReportHeatmapStats,
+  type ReportHeatmapStats,
+} from "@/lib/reports/get-report-heatmap-stats";
 
 export type ReportAiInsights = {
   summary: string;
@@ -18,7 +19,7 @@ export type ReportDisplay = {
   date: string;
   dateISO: string;
   metrics: CalculatedReportMetrics | null;
-  heatmapDescription: string;
+  heatmapStats: ReportHeatmapStats;
   aiInsights: ReportAiInsights | null;
 };
 
@@ -52,6 +53,7 @@ function buildStoredAiInsights(report: DbReport): ReportAiInsights | null {
 export async function buildReportDisplay(report: DbReport): Promise<ReportDisplay> {
   const events = await getReportEvents(report.id);
   const metrics = calculateReportMetrics(events);
+  const heatmapStats = await getReportHeatmapStats(report.id);
 
   return {
     id: report.id,
@@ -59,7 +61,7 @@ export async function buildReportDisplay(report: DbReport): Promise<ReportDispla
     date: formatReportDate(report.created_at),
     dateISO: report.created_at.slice(0, 10),
     metrics,
-    heatmapDescription: PLACEHOLDER_HEATMAP,
+    heatmapStats,
     aiInsights: buildStoredAiInsights(report),
   };
 }
