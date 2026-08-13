@@ -4,6 +4,8 @@ import { createClient } from "@/utils/supabase/server";
 export type HeatmapElementStat = {
   label: string;
   count: number;
+  /** Share of totalClicks, 0–100, rounded. */
+  percent: number;
 };
 
 export type ReportHeatmapStats = {
@@ -14,9 +16,29 @@ export type ReportHeatmapStats = {
 type ClickMetadata = {
   tag?: unknown;
   id?: unknown;
+  text?: unknown;
   viewportWidth?: unknown;
   viewportHeight?: unknown;
 };
+
+const GENERIC_TAGS = new Set([
+  "span",
+  "div",
+  "p",
+  "li",
+  "ul",
+  "ol",
+  "section",
+  "article",
+  "main",
+  "header",
+  "footer",
+  "nav",
+  "strong",
+  "em",
+  "i",
+  "b",
+]);
 
 function isPositiveNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value) && value > 0;
@@ -42,11 +64,45 @@ function elementLabel(metadata: ClickMetadata): string {
     typeof metadata.id === "string" && metadata.id.trim()
       ? metadata.id.trim()
       : null;
+  const text =
+    typeof metadata.text === "string" && metadata.text.trim()
+      ? metadata.text.trim()
+      : null;
 
+  if (tag === "a") {
+    return text ? `${text} link` : "Link";
+  }
+
+  if (tag && GENERIC_TAGS.has(tag)) {
+    return text ?? "Text element";
+  }
+
+  // Clear controls: prefer visible text when we have it
+  if (
+    tag === "button" ||
+    tag === "input" ||
+    tag === "textarea" ||
+    tag === "select" ||
+    tag === "label"
+  ) {
+    if (text) return text;
+    if (id) return `${tag}#${id}`;
+    if (tag === "button") return "Button";
+    if (tag === "input") return "Input";
+    return tag;
+  }
+
+  if (tag === "form") {
+    if (id?.toLowerCase().includes("contact")) return "Contact form";
+    if (id) return `Form (${id})`;
+    return "Form";
+  }
+
+  if (text) return text;
   if (tag && id) return `${tag}#${id}`;
   if (tag) return tag;
   if (id) return `#${id}`;
-  return "(unknown)";
+  return "Unknown element";
 }
 
 export async function getReportHeatmapStats(
@@ -80,7 +136,11 @@ export async function getReportHeatmapStats(
   }
 
   const topElements = [...counts.entries()]
-    .map(([label, count]) => ({ label, count }))
+    .map(([label, count]) => ({
+      label,
+      count,
+      percent: totalClicks > 0 ? Math.round((count / totalClicks) * 100) : 0,
+    }))
     .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
     .slice(0, 5);
 
