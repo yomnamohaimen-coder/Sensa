@@ -1,4 +1,3 @@
-import { ReportHeatmapPanel } from "@/components/report-heatmap-panel";
 import type { ReportDisplay } from "@/lib/reports/build-report-display";
 
 function Section({
@@ -118,10 +117,6 @@ export function ReportView({ report }: { report: ReportDisplay }) {
         ) : (
           <NoDataMessage />
         )}
-      </Section>
-
-      <Section title="Heatmap">
-        <ReportHeatmapPanel report={report} />
       </Section>
 
       <Section title="AI insights">

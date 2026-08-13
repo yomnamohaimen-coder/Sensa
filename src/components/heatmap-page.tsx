@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ReportHeatmapPanel } from "@/components/report-heatmap-panel";
 import type { ReportDisplay } from "@/lib/reports/build-report-display";
@@ -15,16 +15,46 @@ export function HeatmapPageContent({
   initialSelectedReportId,
 }: HeatmapPageContentProps) {
   const router = useRouter();
+  const selectedItemRef = useRef<HTMLLIElement>(null);
   const [selectedReportId, setSelectedReportId] = useState(
     initialSelectedReportId ?? reports[0]?.id ?? "",
   );
 
   const selectedReport = reports.find((report) => report.id === selectedReportId);
 
+  const reportDates = useMemo(() => {
+    const seen = new Set<string>();
+    const dates: { dateISO: string; date: string }[] = [];
+
+    for (const report of reports) {
+      if (seen.has(report.dateISO)) {
+        continue;
+      }
+      seen.add(report.dateISO);
+      dates.push({ dateISO: report.dateISO, date: report.date });
+    }
+
+    return dates;
+  }, [reports]);
+
   function handleSelectReport(reportId: string) {
     setSelectedReportId(reportId);
     router.replace(`/heatmap?report=${reportId}`, { scroll: false });
   }
+
+  function handleSelectDate(dateISO: string) {
+    const match = reports.find((report) => report.dateISO === dateISO);
+    if (match) {
+      handleSelectReport(match.id);
+    }
+  }
+
+  useEffect(() => {
+    selectedItemRef.current?.scrollIntoView({
+      block: "nearest",
+      behavior: "smooth",
+    });
+  }, [selectedReportId]);
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col px-6 py-10">
@@ -63,13 +93,39 @@ export function HeatmapPageContent({
           Open the heatmap for any previous report
         </p>
 
-        <ul className="mt-6 divide-y divide-zinc-200 rounded-lg border border-zinc-200 bg-white shadow-sm">
+        {reportDates.length > 0 && (
+          <div className="mt-4">
+            <label
+              htmlFor="heatmap-date"
+              className="mb-1.5 block text-xs font-medium text-zinc-600"
+            >
+              Date
+            </label>
+            <select
+              id="heatmap-date"
+              value={selectedReport?.dateISO ?? ""}
+              onChange={(event) => handleSelectDate(event.target.value)}
+              className="w-full max-w-xs rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
+            >
+              {reportDates.map((item) => (
+                <option key={item.dateISO} value={item.dateISO}>
+                  {item.date}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <ul className="mt-6 max-h-[400px] divide-y divide-zinc-200 overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
           {reports.length > 0 ? (
             reports.map((report) => {
               const isSelected = report.id === selectedReportId;
 
               return (
-                <li key={report.id}>
+                <li
+                  key={report.id}
+                  ref={isSelected ? selectedItemRef : undefined}
+                >
                   <button
                     type="button"
                     onClick={() => handleSelectReport(report.id)}

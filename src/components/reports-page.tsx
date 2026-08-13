@@ -115,7 +115,7 @@ export function ReportsPageContent({
           </div>
         </div>
 
-        <ul className="mt-6 divide-y divide-zinc-200 rounded-lg border border-zinc-200 bg-white shadow-sm">
+        <ul className="mt-6 max-h-[400px] divide-y divide-zinc-200 overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
           {filteredReports.length > 0 ? (
             filteredReports.map((report) => {
               const isSelected = report.id === selectedReportId;
