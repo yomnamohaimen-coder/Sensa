@@ -4,7 +4,15 @@ import { ListingPageHeatmap } from "@/components/heatmap/listing-page-heatmap";
 import type { ReportDisplay } from "@/lib/reports/build-report-display";
 import { buildHeatmapClickSummary } from "@/lib/reports/heatmap-summary";
 
-export function ReportHeatmapPanel({ report }: { report: ReportDisplay }) {
+export function ReportHeatmapPanel({
+  report,
+  trackingId = null,
+  page = "/listing/42",
+}: {
+  report: ReportDisplay;
+  trackingId?: string | null;
+  page?: string;
+}) {
   const heatmapSummary = buildHeatmapClickSummary(report.heatmapStats);
 
   if (report.heatmapStats.totalClicks === 0) {
@@ -15,7 +23,11 @@ export function ReportHeatmapPanel({ report }: { report: ReportDisplay }) {
 
   return (
     <div className="space-y-4">
-      <ListingPageHeatmap reportId={report.id} />
+      <ListingPageHeatmap
+        reportId={report.id}
+        trackingId={trackingId}
+        page={page}
+      />
 
       <div className="rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3">
         <p className="text-sm font-medium text-zinc-900">

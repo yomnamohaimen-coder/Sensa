@@ -11,9 +11,14 @@ import {
   ListingPageWireframe,
 } from "@/components/heatmap/listing-page-wireframe";
 import { createSensaHeatmapAdapter } from "@/lib/heatmap/create-sensa-heatmap-adapter";
+import {
+  getPageSnapshot,
+  type PageSnapshot,
+} from "@/lib/heatmap/get-page-snapshot";
 
 type ListingPageHeatmapProps = {
   reportId: string;
+  trackingId?: string | null;
   /** Pathname filter; defaults to the harbor-homes listing page under test. */
   page?: string;
 };
@@ -186,11 +191,15 @@ function ContainedDocumentHeatmap({
 
 export function ListingPageHeatmap({
   reportId,
+  trackingId = null,
   page = "/listing/42",
 }: ListingPageHeatmapProps) {
   const fitRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
+  const [snapshot, setSnapshot] = useState<PageSnapshot | null>(null);
+  const [snapshotReady, setSnapshotReady] = useState(!trackingId);
   const [scale, setScale] = useState(1);
+  const [nativeWidth, setNativeWidth] = useState(LISTING_WIREFRAME_WIDTH);
   const [nativeHeight, setNativeHeight] = useState(0);
 
   const adapter = useMemo(
@@ -211,26 +220,66 @@ export function ListingPageHeatmap({
 
   const { data, isLoading, error } = useHeatmapData(adapter, query);
   const hasEvents = data.length > 0;
-  const isMeasured = nativeHeight > 0;
+  const usingSnapshot = snapshotReady && snapshot !== null;
+  const isMeasured = nativeHeight > 0 && nativeWidth > 0;
+
+  useEffect(() => {
+    if (!trackingId) {
+      setSnapshot(null);
+      setSnapshotReady(true);
+      return;
+    }
+
+    let cancelled = false;
+    setSnapshotReady(false);
+
+    getPageSnapshot(trackingId, page).then((row) => {
+      if (cancelled) {
+        return;
+      }
+      setSnapshot(row);
+      if (row) {
+        setNativeWidth(row.width);
+        setNativeHeight(row.height);
+      } else {
+        setNativeWidth(LISTING_WIREFRAME_WIDTH);
+        setNativeHeight(0);
+      }
+      setSnapshotReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [trackingId, page]);
 
   useLayoutEffect(() => {
     const fit = fitRef.current;
-    const measure = measureRef.current;
-    if (!fit || !measure) {
+    if (!fit) {
       return;
     }
 
     let rafId = 0;
+    const measure = measureRef.current;
 
     const update = () => {
       const availableWidth = fit.clientWidth;
+      const widthForScale = usingSnapshot
+        ? nativeWidth
+        : LISTING_WIREFRAME_WIDTH;
       const nextScale =
-        availableWidth > 0
-          ? Math.min(1, availableWidth / LISTING_WIREFRAME_WIDTH)
-          : 1;
-      const nextHeight = Math.max(measure.scrollHeight, measure.offsetHeight);
-
+        availableWidth > 0 ? Math.min(1, availableWidth / widthForScale) : 1;
       setScale(nextScale);
+
+      if (usingSnapshot) {
+        return nativeHeight;
+      }
+
+      if (!measure) {
+        return 0;
+      }
+
+      const nextHeight = Math.max(measure.scrollHeight, measure.offsetHeight);
       if (nextHeight > 0) {
         setNativeHeight(nextHeight);
       }
@@ -238,7 +287,7 @@ export function ListingPageHeatmap({
     };
 
     const height = update();
-    if (height === 0) {
+    if (!usingSnapshot && height === 0) {
       rafId = requestAnimationFrame(() => {
         update();
       });
@@ -248,13 +297,15 @@ export function ListingPageHeatmap({
       update();
     });
     observer.observe(fit);
-    observer.observe(measure);
+    if (measure && !usingSnapshot) {
+      observer.observe(measure);
+    }
 
     return () => {
       observer.disconnect();
       cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [usingSnapshot, nativeWidth, nativeHeight]);
 
   const scaledHeight = isMeasured
     ? Math.ceil(nativeHeight * scale)
@@ -270,24 +321,46 @@ export function ListingPageHeatmap({
         style={{
           position: "relative",
           height: scaledHeight,
+          maxHeight: "none",
+          overflow: "visible",
         }}
       >
         {/*
           Until the first non-zero measure, keep the stage in normal flow so
-          ListingPageWireframe can contribute real height. Absolute + empty
-          spacer collapses the measure target and sticks nativeHeight at 0.
+          content can contribute real height. Absolute + empty spacer collapses
+          the measure target and sticks nativeHeight at 0.
         */}
         <div
           className={isMeasured ? "absolute top-0 left-0" : "relative"}
           style={{
-            width: LISTING_WIREFRAME_WIDTH,
+            width: usingSnapshot ? nativeWidth : LISTING_WIREFRAME_WIDTH,
             height: isMeasured ? nativeHeight : undefined,
             transform: `scale(${scale})`,
             transformOrigin: "top left",
           }}
         >
           <div ref={measureRef}>
-            <ListingPageWireframe />
+            {usingSnapshot && snapshot ? (
+              <img
+                src={snapshot.image_url}
+                alt=""
+                width={snapshot.width}
+                height={snapshot.height}
+                className="block max-w-none"
+                style={{ width: nativeWidth, height: nativeHeight }}
+                onLoad={(event) => {
+                  const img = event.currentTarget;
+                  if (img.naturalWidth > 0) {
+                    setNativeWidth(img.naturalWidth);
+                  }
+                  if (img.naturalHeight > 0) {
+                    setNativeHeight(img.naturalHeight);
+                  }
+                }}
+              />
+            ) : (
+              <ListingPageWireframe />
+            )}
           </div>
 
           {isLoading && (
@@ -315,7 +388,7 @@ export function ListingPageHeatmap({
           {!isLoading && !error && hasEvents && isMeasured && (
             <ContainedDocumentHeatmap
               events={data}
-              width={LISTING_WIREFRAME_WIDTH}
+              width={nativeWidth}
               height={nativeHeight}
               radius={DEFAULT_RADIUS}
               opacity={DEFAULT_OPACITY}
