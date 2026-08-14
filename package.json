@@ -17,7 +17,8 @@
     "puppeteer": "^25.7.0",
     "react": "19.2.4",
     "react-clickmap": "^0.3.0",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "rrweb-player": "^2.1.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

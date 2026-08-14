@@ -38,6 +38,7 @@
     var captureInFlight = false;
     var RRWEB_FLUSH_MS = 10000;
     var RRWEB_FLUSH_COUNT = 50;
+    var RRWEB_KEEPALIVE_MAX_BYTES = 60 * 1024;
     var rrwebBuffer = [];
     var rrwebFlushTimer = null;
     var rrwebStop = null;
@@ -558,27 +559,39 @@
       return null;
     }
 
-    function flushRrwebBuffer() {
+    function flushRrwebBuffer(options) {
       try {
         if (rrwebBuffer.length === 0 || !recordingEndpoint) {
           return;
         }
 
         var batch = rrwebBuffer.splice(0, rrwebBuffer.length);
+        var body = JSON.stringify({
+          tracking_id: trackingId,
+          session_id: getSessionId(),
+          page: getPage(),
+          rrweb_events: batch,
+        });
+        var preferKeepalive = !options || options.keepalive !== false;
+        var useKeepalive =
+          preferKeepalive && body.length < RRWEB_KEEPALIVE_MAX_BYTES;
 
         fetch(recordingEndpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            tracking_id: trackingId,
-            session_id: getSessionId(),
-            page: getPage(),
-            rrweb_events: batch,
-          }),
-          keepalive: true,
+          body: body,
+          keepalive: useKeepalive,
           mode: "cors",
           credentials: "omit",
-        }).catch(function () {});
+        })
+          .then(function (response) {
+            if (!response.ok) {
+              rrwebBuffer = batch.concat(rrwebBuffer);
+            }
+          })
+          .catch(function () {
+            rrwebBuffer = batch.concat(rrwebBuffer);
+          });
       } catch (error) {
         // Fail silently — never break the host page.
       }
@@ -587,6 +600,10 @@
     function queueRrwebEvent(event) {
       try {
         rrwebBuffer.push(event);
+        if (event && event.type === 2) {
+          flushRrwebBuffer({ keepalive: false });
+          return;
+        }
         if (rrwebBuffer.length >= RRWEB_FLUSH_COUNT) {
           flushRrwebBuffer();
         }
