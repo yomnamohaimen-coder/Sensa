@@ -590,6 +590,17 @@
             tag: String(target.tagName).toLowerCase(),
             id: target.id || null,
             text: clickLabel(target) || null,
+            alt: (function () {
+              if (String(target.tagName).toLowerCase() !== "img") {
+                return null;
+              }
+              var altAttr = target.getAttribute("alt");
+              if (!altAttr) {
+                return null;
+              }
+              var trimmed = String(altAttr).replace(/\s+/g, " ").trim();
+              return trimmed ? trimmed.slice(0, 100) : null;
+            })(),
           });
         } catch (error) {
           // Fail silently.

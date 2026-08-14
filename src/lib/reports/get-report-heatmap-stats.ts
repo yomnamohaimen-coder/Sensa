@@ -17,6 +17,7 @@ type ClickMetadata = {
   tag?: unknown;
   id?: unknown;
   text?: unknown;
+  alt?: unknown;
   viewportWidth?: unknown;
   viewportHeight?: unknown;
 };
@@ -96,6 +97,14 @@ function elementLabel(metadata: ClickMetadata): string {
     if (id?.toLowerCase().includes("contact")) return "Contact form";
     if (id) return `Form (${id})`;
     return "Form";
+  }
+
+  if (tag === "img") {
+    const alt =
+      typeof metadata.alt === "string" && metadata.alt.trim()
+        ? metadata.alt.trim()
+        : null;
+    return alt ?? "Image";
   }
 
   if (text) return text;
