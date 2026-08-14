@@ -14,8 +14,13 @@
 
     var endpoint = resolveEndpoint(scriptEl.src, "/api/track");
     var snapshotEndpoint = resolveEndpoint(scriptEl.src, "/api/snapshot");
+    var recordingEndpoint = resolveEndpoint(
+      scriptEl.src,
+      "/api/session-recording",
+    );
     // Same origin as track.js so host-site CSP that allows Sensa still works.
     var html2canvasSrc = resolveEndpoint(scriptEl.src, "/html2canvas.min.js");
+    var rrwebRecordSrc = resolveEndpoint(scriptEl.src, "/rrweb-record.umd.cjs");
     if (!endpoint) {
       return;
     }
@@ -31,6 +36,11 @@
     var MAX_CANVAS_EDGE = 4096;
     var MAX_CANVAS_AREA = 12 * 1024 * 1024;
     var captureInFlight = false;
+    var RRWEB_FLUSH_MS = 10000;
+    var RRWEB_FLUSH_COUNT = 50;
+    var rrwebBuffer = [];
+    var rrwebFlushTimer = null;
+    var rrwebStop = null;
 
     function resolveEndpoint(scriptSrc, apiPath) {
       if (!scriptSrc) {
@@ -535,6 +545,143 @@
       }
     }
 
+    function getRrwebRecordFn() {
+      if (window.rrweb && typeof window.rrweb.record === "function") {
+        return window.rrweb.record;
+      }
+      if (typeof window.rrwebRecord === "function") {
+        return window.rrwebRecord;
+      }
+      if (window.rrwebRecord && typeof window.rrwebRecord.record === "function") {
+        return window.rrwebRecord.record;
+      }
+      return null;
+    }
+
+    function flushRrwebBuffer() {
+      try {
+        if (rrwebBuffer.length === 0 || !recordingEndpoint) {
+          return;
+        }
+
+        var batch = rrwebBuffer.splice(0, rrwebBuffer.length);
+
+        fetch(recordingEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tracking_id: trackingId,
+            session_id: getSessionId(),
+            page: getPage(),
+            rrweb_events: batch,
+          }),
+          keepalive: true,
+          mode: "cors",
+          credentials: "omit",
+        }).catch(function () {});
+      } catch (error) {
+        // Fail silently — never break the host page.
+      }
+    }
+
+    function queueRrwebEvent(event) {
+      try {
+        rrwebBuffer.push(event);
+        if (rrwebBuffer.length >= RRWEB_FLUSH_COUNT) {
+          flushRrwebBuffer();
+        }
+      } catch (error) {
+        // Fail silently.
+      }
+    }
+
+    function loadRrwebRecord(callback) {
+      try {
+        if (!rrwebRecordSrc) {
+          return;
+        }
+
+        var called = false;
+        function done(fn) {
+          if (called || typeof fn !== "function") {
+            return;
+          }
+          called = true;
+          callback(fn);
+        }
+
+        var existingFn = getRrwebRecordFn();
+        if (existingFn) {
+          done(existingFn);
+          return;
+        }
+
+        var existing = document.querySelector('script[data-sensa-rrweb="1"]');
+        if (!existing) {
+          var script = document.createElement("script");
+          script.async = true;
+          script.setAttribute("data-sensa-rrweb", "1");
+          script.onload = function () {
+            done(getRrwebRecordFn());
+          };
+          script.onerror = function () {};
+          script.src = rrwebRecordSrc;
+          (document.head || document.documentElement).appendChild(script);
+        } else {
+          existing.addEventListener("load", function () {
+            done(getRrwebRecordFn());
+          });
+        }
+
+        var polls = 0;
+        var pollId = setInterval(function () {
+          polls += 1;
+          var fn = getRrwebRecordFn();
+          if (fn) {
+            clearInterval(pollId);
+            done(fn);
+          } else if (polls >= 100) {
+            clearInterval(pollId);
+          }
+        }, 50);
+      } catch (error) {
+        // Fail silently.
+      }
+    }
+
+    function startSessionRecording() {
+      try {
+        loadRrwebRecord(function (record) {
+          try {
+            if (typeof record !== "function" || rrwebStop) {
+              return;
+            }
+
+            rrwebStop = record({
+              emit: function (event) {
+                queueRrwebEvent(event);
+              },
+            });
+
+            if (!rrwebFlushTimer) {
+              rrwebFlushTimer = setInterval(flushRrwebBuffer, RRWEB_FLUSH_MS);
+            }
+
+            document.addEventListener("visibilitychange", function () {
+              if (document.visibilityState === "hidden") {
+                flushRrwebBuffer();
+              }
+            });
+            window.addEventListener("pagehide", flushRrwebBuffer);
+          } catch (error) {
+            // Fail silently.
+          }
+        });
+      } catch (error) {
+        // Fail silently.
+      }
+    }
+
     function schedulePageSnapshot() {
       try {
         function run() {
@@ -610,6 +757,7 @@
     );
 
     schedulePageSnapshot();
+    startSessionRecording();
   } catch (error) {
     // Fail silently.
   }
