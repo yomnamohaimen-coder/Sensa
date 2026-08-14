@@ -1,4 +1,5 @@
 import { cookies, headers } from "next/headers";
+import { ConnectSiteUrlForm } from "@/components/connect-site-url-form";
 import { ConnectSnippet } from "@/components/connect-snippet";
 import { createClient } from "@/utils/supabase/server";
 
@@ -23,7 +24,7 @@ export default async function ConnectPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("tracking_id")
+    .select("tracking_id, site_url")
     .eq("id", user!.id)
     .maybeSingle();
 
@@ -65,6 +66,10 @@ export default async function ConnectPage() {
           </p>
         </div>
       )}
+
+      <div className="mt-6">
+        <ConnectSiteUrlForm initialSiteUrl={profile?.site_url ?? ""} />
+      </div>
 
       <div
         className={`mt-6 rounded-lg border px-4 py-4 text-sm ${

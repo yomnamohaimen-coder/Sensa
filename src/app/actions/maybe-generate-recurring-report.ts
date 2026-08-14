@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { captureMissingSnapshotsForReport } from "@/lib/heatmap/capture-page-snapshot";
 import { isAutoReportDue } from "@/lib/reports/analysis-interval";
 import { generateAndStoreReportInsights } from "@/lib/reports/generate-and-store-report-insights";
 import { createClient } from "@/utils/supabase/server";
@@ -27,7 +28,9 @@ export async function maybeGenerateRecurringReport(): Promise<RecurringReportRes
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("analysis_interval_days, analysis_manual_only, last_auto_report_at")
+    .select(
+      "analysis_interval_days, analysis_manual_only, last_auto_report_at, tracking_id, site_url",
+    )
     .eq("id", user.id)
     .maybeSingle();
 
@@ -175,6 +178,29 @@ export async function maybeGenerateRecurringReport(): Promise<RecurringReportRes
 
   revalidatePath("/reports");
   revalidatePath("/dashboard");
+  revalidatePath("/heatmap");
+
+  const trackingId =
+    typeof profile.tracking_id === "string" ? profile.tracking_id : null;
+  const clickPages = analyticsEvents
+    .filter((event) => event.event_type === "click")
+    .map((event) => event.page);
+
+  try {
+    if (trackingId) {
+      await captureMissingSnapshotsForReport({
+        userId: user.id,
+        trackingId,
+        siteUrl: profile.site_url,
+        pages: clickPages,
+      });
+    }
+  } catch (error) {
+    console.error(
+      "Non-fatal: snapshot capture after auto report failed:",
+      error,
+    );
+  }
 
   return { status: "created", reportId: report.id };
 }

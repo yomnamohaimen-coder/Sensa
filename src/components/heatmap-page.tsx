@@ -21,10 +21,6 @@ export function HeatmapPageContent({
   const [selectedReportId, setSelectedReportId] = useState(
     initialSelectedReportId ?? reports[0]?.id ?? "",
   );
-  const [capturePage, setCapturePage] = useState("/listing/42");
-  const [captureBaseUrl, setCaptureBaseUrl] = useState("http://localhost:5173");
-  const [captureStatus, setCaptureStatus] = useState<string | null>(null);
-  const [captureBusy, setCaptureBusy] = useState(false);
 
   const selectedReport = reports.find((report) => report.id === selectedReportId);
 
@@ -73,94 +69,6 @@ export function HeatmapPageContent({
         </p>
       </header>
 
-      <div className="mb-8 rounded-md border border-dashed border-amber-300 bg-amber-50 px-4 py-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-amber-800">
-          Temporary capture test
-        </p>
-        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div className="flex-1">
-            <label
-              htmlFor="capture-page"
-              className="mb-1.5 block text-xs font-medium text-zinc-600"
-            >
-              Page
-            </label>
-            <input
-              id="capture-page"
-              type="text"
-              value={capturePage}
-              onChange={(event) => setCapturePage(event.target.value)}
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
-            />
-          </div>
-          <div className="flex-1">
-            <label
-              htmlFor="capture-base-url"
-              className="mb-1.5 block text-xs font-medium text-zinc-600"
-            >
-              Base URL
-            </label>
-            <input
-              id="capture-base-url"
-              type="text"
-              value={captureBaseUrl}
-              onChange={(event) => setCaptureBaseUrl(event.target.value)}
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
-            />
-          </div>
-          <button
-            type="button"
-            disabled={captureBusy || !trackingId}
-            onClick={async () => {
-              if (!trackingId) {
-                return;
-              }
-              setCaptureBusy(true);
-              setCaptureStatus(null);
-              try {
-                const response = await fetch("/api/capture-snapshot", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    tracking_id: trackingId,
-                    page: capturePage,
-                    base_url: captureBaseUrl,
-                  }),
-                });
-                const payload = (await response.json()) as {
-                  error?: string;
-                  image_url?: string;
-                };
-                if (!response.ok) {
-                  setCaptureStatus(payload.error ?? "Capture failed.");
-                  return;
-                }
-                setCaptureStatus(
-                  payload.image_url
-                    ? `Saved: ${payload.image_url}`
-                    : "Snapshot captured.",
-                );
-              } catch {
-                setCaptureStatus("Could not reach the capture endpoint.");
-              } finally {
-                setCaptureBusy(false);
-              }
-            }}
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {captureBusy ? "Capturing…" : "Capture screenshot"}
-          </button>
-        </div>
-        {!trackingId && (
-          <p className="mt-2 text-xs text-amber-800">
-            No tracking ID on this account yet.
-          </p>
-        )}
-        {captureStatus && (
-          <p className="mt-2 break-all text-xs text-zinc-700">{captureStatus}</p>
-        )}
-      </div>
-
       <div className="mb-12">
         {selectedReport ? (
           <>
@@ -170,7 +78,6 @@ export function HeatmapPageContent({
             <ReportHeatmapPanel
               report={selectedReport}
               trackingId={trackingId}
-              page={capturePage}
             />
           </>
         ) : (
