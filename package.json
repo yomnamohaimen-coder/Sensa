@@ -18,6 +18,7 @@
     "react": "19.2.4",
     "react-clickmap": "^0.3.0",
     "react-dom": "19.2.4",
+    "recharts": "^3.10.1",
     "rrweb-player": "^2.1.1"
   },
   "devDependencies": {

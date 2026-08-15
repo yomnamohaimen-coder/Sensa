@@ -1,11 +1,19 @@
 import Link from "next/link";
-import { Sparkline, TrendIndicator } from "@/components/dashboard-metrics";
+import { TrendIndicator } from "@/components/dashboard-metrics";
+import { SevenDayTrendChart } from "@/components/seven-day-trend-chart";
 import {
   MOCK_DASHBOARD_STATS,
   MOCK_KEY_INSIGHT,
   MOCK_LAST_ANALYSIS,
   MOCK_SPARKLINE,
 } from "@/lib/mock-data";
+
+const TREND_DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+const mockTrendData = MOCK_SPARKLINE.map((value, index) => ({
+  label: TREND_DAY_LABELS[index] ?? `Day ${index + 1}`,
+  value,
+}));
 
 export function DashboardWithReports() {
   return (
@@ -33,7 +41,7 @@ export function DashboardWithReports() {
       </div>
 
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col items-start justify-between gap-6 sm:flex-row">
           <div className="flex-1">
             <p className="text-sm font-medium text-zinc-900">Last analysis</p>
             <p className="mt-1 text-sm text-zinc-500">
@@ -49,9 +57,9 @@ export function DashboardWithReports() {
               />
             </div>
           </div>
-          <div className="shrink-0 pt-1">
+          <div className="w-full shrink-0 sm:w-auto sm:pt-1">
             <p className="mb-1 text-right text-xs text-zinc-400">7-day trend</p>
-            <Sparkline data={MOCK_SPARKLINE} />
+            <SevenDayTrendChart data={mockTrendData} isLoading={false} />
           </div>
         </div>
       </div>
