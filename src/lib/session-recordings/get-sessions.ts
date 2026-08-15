@@ -1,5 +1,3 @@
-"use server";
-
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 
@@ -51,7 +49,9 @@ export async function getUserSessionRecordings(): Promise<
   SessionRecordingSummary[]
 > {
   const { supabase, trackingId } = await getSignedInTrackingId();
+  console.log("[getUserSessionRecordings] trackingId:", trackingId);
   if (!trackingId) {
+    console.log("[getUserSessionRecordings] no trackingId — returning []");
     return [];
   }
 
@@ -65,7 +65,20 @@ export async function getUserSessionRecordings(): Promise<
       .order("created_at", { ascending: true })
       .range(from, from + PAGE_SIZE - 1);
 
-    if (error || !data || data.length === 0) {
+    console.log("[getUserSessionRecordings] supabase error:", error);
+    console.log(
+      "[getUserSessionRecordings] page rows:",
+      data?.length ?? 0,
+      "from:",
+      from,
+    );
+
+    if (error) {
+      console.error("Failed to list session recordings:", error);
+      break;
+    }
+
+    if (!data || data.length === 0) {
       break;
     }
 
@@ -74,6 +87,11 @@ export async function getUserSessionRecordings(): Promise<
       break;
     }
   }
+
+  console.log(
+    "[getUserSessionRecordings] raw chunk count before grouping:",
+    chunks.length,
+  );
 
   const bySession = new Map<
     string,
@@ -107,44 +125,14 @@ export async function getUserSessionRecordings(): Promise<
     }
   }
 
-  return [...bySession.entries()]
+  const sessions = [...bySession.entries()]
     .map(([sessionId, value]) => ({ sessionId, ...value }))
     .sort((a, b) => b.startedAt.localeCompare(a.startedAt));
-}
 
-export async function getSessionRrwebEvents(
-  sessionId: string,
-): Promise<unknown[]> {
-  const { supabase, trackingId } = await getSignedInTrackingId();
-  if (!trackingId || !sessionId.trim()) {
-    return [];
-  }
+  console.log(
+    "[getUserSessionRecordings] sessions after grouping:",
+    sessions.length,
+  );
 
-  const events: unknown[] = [];
-
-  for (let from = 0; ; from += PAGE_SIZE) {
-    const { data, error } = await supabase
-      .from("session_recordings")
-      .select("rrweb_events, created_at")
-      .eq("tracking_id", trackingId)
-      .eq("session_id", sessionId)
-      .order("created_at", { ascending: true })
-      .range(from, from + PAGE_SIZE - 1);
-
-    if (error || !data || data.length === 0) {
-      break;
-    }
-
-    for (const row of data) {
-      if (Array.isArray(row.rrweb_events)) {
-        events.push(...row.rrweb_events);
-      }
-    }
-
-    if (data.length < PAGE_SIZE) {
-      break;
-    }
-  }
-
-  return events;
+  return sessions;
 }

@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/utils/supabase/service";
 
@@ -112,6 +113,8 @@ export async function POST(request: Request) {
       console.error("Failed to insert session recording:", insertError);
       return jsonResponse({ error: "Could not store recording." }, 500);
     }
+
+    revalidatePath("/session-recordings");
 
     return jsonResponse({ ok: true, recording_id: recording.id }, 201);
   } catch (error) {

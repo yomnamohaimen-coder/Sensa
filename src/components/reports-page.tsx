@@ -23,6 +23,11 @@ export function ReportsPageContent({
   const [endDate, setEndDate] = useState("");
 
   const selectedReport = reports.find((report) => report.id === selectedReportId);
+  const selectedIndex = reports.findIndex(
+    (report) => report.id === selectedReportId,
+  );
+  const previousReport =
+    selectedIndex >= 0 ? reports[selectedIndex + 1] : undefined;
 
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
@@ -63,7 +68,10 @@ export function ReportsPageContent({
             <p className="mb-4 text-xs font-medium uppercase tracking-wide text-zinc-400">
               {isMostRecent ? "Most recent report" : "Selected report"}
             </p>
-            <ReportView report={selectedReport} />
+            <ReportView
+              report={selectedReport}
+              previousMetrics={previousReport?.metrics ?? null}
+            />
           </>
         ) : (
           <div className="rounded-lg border border-dashed border-zinc-200 bg-white px-6 py-10 text-center">

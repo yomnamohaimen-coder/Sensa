@@ -3,10 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { SessionPlayer } from "@/components/session-recordings/session-player";
 import { getOrCreateSessionSummary } from "@/lib/session-recordings/build-session-summary";
-import {
-  getSessionRrwebEvents,
-  type SessionRecordingSummary,
-} from "@/lib/session-recordings/get-sessions";
+import { getSessionRrwebEvents } from "@/lib/session-recordings/get-session-events";
+import type { SessionRecordingSummary } from "@/lib/session-recordings/get-sessions";
 
 function formatSessionTime(iso: string) {
   return new Date(iso).toLocaleString("en-US", {
@@ -136,6 +134,12 @@ export function SessionRecordingsPageContent({
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col px-6 py-10">
+      <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+        DEBUG sessions.length = {sessions.length}
+        {sessions[0]
+          ? ` · first = ${sessions[0].sessionId.slice(0, 8)}… ${sessions[0].startedAt}`
+          : ""}
+      </p>
       <header className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
           Session Recordings

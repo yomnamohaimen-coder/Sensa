@@ -26,6 +26,10 @@
     }
 
     var SESSION_KEY = "sensa_sid";
+    var SESSION_ACTIVITY_KEY = "sensa_sid_at";
+    var SESSION_TIMEOUT_MS = 30 * 60 * 1000;
+    var memorySessionId = null;
+    var memoryActivityAt = 0;
     // Only written after a successful /api/snapshot response.
     var SNAPSHOT_KEY_PREFIX = "sensa_snap_ok:";
     var SNAPSHOT_SETTLE_MS = 1000;
@@ -59,30 +63,63 @@
       }
     }
 
-    function getSessionId() {
-      try {
-        var existing = sessionStorage.getItem(SESSION_KEY);
-        if (existing) {
-          return existing;
-        }
-
-        var id =
-          (window.crypto &&
-            typeof window.crypto.randomUUID === "function" &&
-            window.crypto.randomUUID()) ||
-          "sess_" +
-            Math.random().toString(36).slice(2) +
-            Date.now().toString(36);
-
-        sessionStorage.setItem(SESSION_KEY, id);
-        return id;
-      } catch (error) {
-        return (
-          "sess_" +
+    function createSessionId() {
+      return (
+        (window.crypto &&
+          typeof window.crypto.randomUUID === "function" &&
+          window.crypto.randomUUID()) ||
+        "sess_" +
           Math.random().toString(36).slice(2) +
           Date.now().toString(36)
-        );
+      );
+    }
+
+    function readSessionState() {
+      try {
+        var id = sessionStorage.getItem(SESSION_KEY) || memorySessionId;
+        var atRaw = sessionStorage.getItem(SESSION_ACTIVITY_KEY);
+        var at = atRaw ? parseInt(atRaw, 10) : memoryActivityAt;
+        return {
+          id: id || null,
+          at: Number.isFinite(at) ? at : 0,
+        };
+      } catch (error) {
+        return { id: memorySessionId, at: memoryActivityAt };
       }
+    }
+
+    function writeSessionState(id, at) {
+      memorySessionId = id;
+      memoryActivityAt = at;
+      try {
+        sessionStorage.setItem(SESSION_KEY, id);
+        sessionStorage.setItem(SESSION_ACTIVITY_KEY, String(at));
+      } catch (error) {
+        // sessionStorage unavailable — memory fallback only.
+      }
+    }
+
+    function sessionHasTimedOut(state, now) {
+      return (
+        Boolean(state.id) &&
+        state.at > 0 &&
+        now - state.at > SESSION_TIMEOUT_MS
+      );
+    }
+
+    function getSessionId() {
+      var now = Date.now();
+      var state = readSessionState();
+      var expired = sessionHasTimedOut(state, now);
+
+      if (expired) {
+        flushRrwebBuffer({ sessionId: state.id });
+        restartSessionRecording();
+      }
+
+      var id = !state.id || expired ? createSessionId() : state.id;
+      writeSessionState(id, now);
+      return id;
     }
 
     function getDevice() {
@@ -566,9 +603,11 @@
         }
 
         var batch = rrwebBuffer.splice(0, rrwebBuffer.length);
+        var sessionId =
+          options && options.sessionId ? options.sessionId : getSessionId();
         var body = JSON.stringify({
           tracking_id: trackingId,
-          session_id: getSessionId(),
+          session_id: sessionId,
           page: getPage(),
           rrweb_events: batch,
         });
@@ -599,6 +638,13 @@
 
     function queueRrwebEvent(event) {
       try {
+        var now = Date.now();
+        if (sessionHasTimedOut(readSessionState(), now)) {
+          getSessionId();
+          return;
+        }
+
+        getSessionId();
         rrwebBuffer.push(event);
         if (event && event.type === 2) {
           flushRrwebBuffer({ keepalive: false });
@@ -666,6 +712,20 @@
       }
     }
 
+    var rrwebLifecycleBound = false;
+
+    function restartSessionRecording() {
+      try {
+        if (typeof rrwebStop === "function") {
+          rrwebStop();
+        }
+      } catch (error) {
+        // Fail silently.
+      }
+      rrwebStop = null;
+      startSessionRecording();
+    }
+
     function startSessionRecording() {
       try {
         loadRrwebRecord(function (record) {
@@ -684,12 +744,15 @@
               rrwebFlushTimer = setInterval(flushRrwebBuffer, RRWEB_FLUSH_MS);
             }
 
-            document.addEventListener("visibilitychange", function () {
-              if (document.visibilityState === "hidden") {
-                flushRrwebBuffer();
-              }
-            });
-            window.addEventListener("pagehide", flushRrwebBuffer);
+            if (!rrwebLifecycleBound) {
+              rrwebLifecycleBound = true;
+              document.addEventListener("visibilitychange", function () {
+                if (document.visibilityState === "hidden") {
+                  flushRrwebBuffer();
+                }
+              });
+              window.addEventListener("pagehide", flushRrwebBuffer);
+            }
           } catch (error) {
             // Fail silently.
           }
