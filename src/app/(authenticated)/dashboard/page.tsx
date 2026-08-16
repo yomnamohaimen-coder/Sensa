@@ -2,8 +2,9 @@ import { cookies } from "next/headers";
 import { DashboardWithReports } from "@/components/dashboard-with-reports";
 import { RecurringAnalysisChecker } from "@/components/recurring-analysis-checker";
 import { StartAnalysisUpload } from "@/components/start-analysis-upload";
+import { buildReportDisplay } from "@/lib/reports/build-report-display";
+import { getUserReports } from "@/lib/reports/get-reports";
 import { createClient } from "@/utils/supabase/server";
-import { HAS_REPORTS } from "@/lib/mock-data";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -22,6 +23,12 @@ export default async function DashboardPage() {
   const welcomeName = profile?.product_name?.trim();
   const welcomeMessage = welcomeName ? `Welcome, ${welcomeName}` : "Welcome";
 
+  const dbReports = await getUserReports();
+  const latestReport =
+    dbReports[0] != null ? await buildReportDisplay(dbReports[0]) : null;
+  const previousReport =
+    dbReports[1] != null ? await buildReportDisplay(dbReports[1]) : null;
+
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col px-6 py-10">
       <header className="mb-8">
@@ -32,21 +39,20 @@ export default async function DashboardPage() {
 
       <RecurringAnalysisChecker />
 
-      {HAS_REPORTS ? (
-        <DashboardWithReports />
+      {latestReport ? (
+        <DashboardWithReports
+          latestReport={latestReport}
+          previousMetrics={previousReport?.metrics ?? null}
+        />
       ) : (
         <div className="mb-8">
           <p className="text-base text-zinc-600">
-            You haven&apos;t run an analysis yet — start with your first upload.
+            No analysis yet — connect your site or upload a CSV to get started.
           </p>
         </div>
       )}
 
       <StartAnalysisUpload />
-
-      <p className="mt-16 text-sm text-zinc-400">
-        More insights and comparisons coming soon
-      </p>
     </div>
   );
 }
