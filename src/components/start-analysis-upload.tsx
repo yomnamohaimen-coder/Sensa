@@ -68,7 +68,30 @@ export function StartAnalysisUpload() {
     };
   }, []);
 
-  function handleStartClick() {
+  useEffect(() => {
+    if (!isExpanded) {
+      return;
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && !isAnalyzing) {
+        resetToInitialState();
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isExpanded, isAnalyzing]);
+
+  function handleToggleClick() {
+    if (isExpanded) {
+      if (isAnalyzing) {
+        return;
+      }
+      resetToInitialState();
+      return;
+    }
+
     clearCollapseTimeout();
     setIsExpanded(true);
     setError(null);
@@ -134,7 +157,8 @@ export function StartAnalysisUpload() {
     <div>
       <button
         type="button"
-        onClick={handleStartClick}
+        onClick={handleToggleClick}
+        aria-expanded={isExpanded}
         className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
       >
         Upload CSV
