@@ -75,8 +75,10 @@ export function ConnectSiteUrlForm({ initialSiteUrl }: ConnectSiteUrlFormProps) 
     >
       <h2 className="text-base font-semibold text-zinc-900">Your website</h2>
       <p className="mt-1 text-sm text-zinc-500">
-        The base URL Sensa should visit when capturing page screenshots for
-        heatmaps (e.g. http://localhost:5173 or https://example.com).
+        Add your website&apos;s main link here. Sensa uses it to visit your pages
+        and capture what they look like — this is what makes the Heatmap and
+        Session Recordings features work (e.g. http://localhost:5173 or
+        https://example.com).
       </p>
 
       <div className="mt-5">

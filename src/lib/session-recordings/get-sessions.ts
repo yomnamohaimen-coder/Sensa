@@ -49,9 +49,7 @@ export async function getUserSessionRecordings(): Promise<
   SessionRecordingSummary[]
 > {
   const { supabase, trackingId } = await getSignedInTrackingId();
-  console.log("[getUserSessionRecordings] trackingId:", trackingId);
   if (!trackingId) {
-    console.log("[getUserSessionRecordings] no trackingId — returning []");
     return [];
   }
 
@@ -64,14 +62,6 @@ export async function getUserSessionRecordings(): Promise<
       .eq("tracking_id", trackingId)
       .order("created_at", { ascending: true })
       .range(from, from + PAGE_SIZE - 1);
-
-    console.log("[getUserSessionRecordings] supabase error:", error);
-    console.log(
-      "[getUserSessionRecordings] page rows:",
-      data?.length ?? 0,
-      "from:",
-      from,
-    );
 
     if (error) {
       console.error("Failed to list session recordings:", error);
@@ -87,11 +77,6 @@ export async function getUserSessionRecordings(): Promise<
       break;
     }
   }
-
-  console.log(
-    "[getUserSessionRecordings] raw chunk count before grouping:",
-    chunks.length,
-  );
 
   const bySession = new Map<
     string,
@@ -125,14 +110,7 @@ export async function getUserSessionRecordings(): Promise<
     }
   }
 
-  const sessions = [...bySession.entries()]
+  return [...bySession.entries()]
     .map(([sessionId, value]) => ({ sessionId, ...value }))
     .sort((a, b) => b.startedAt.localeCompare(a.startedAt));
-
-  console.log(
-    "[getUserSessionRecordings] sessions after grouping:",
-    sessions.length,
-  );
-
-  return sessions;
 }
