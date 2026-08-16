@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { TrendIndicator } from "@/components/dashboard-metrics";
+import { EmptyStatValue } from "@/components/empty-states";
+import { FunnelChart } from "@/components/funnel-chart";
 import type { CalculatedReportMetrics } from "@/lib/analytics/calculate-report-metrics";
 import {
   parseDurationMs,
@@ -10,7 +12,7 @@ import type { ReportDisplay } from "@/lib/reports/build-report-display";
 
 type StatCard = {
   label: string;
-  value: string;
+  value: string | null;
   trend: TrendChange | null;
   invertColors?: boolean;
   hero?: boolean;
@@ -59,12 +61,12 @@ function buildStatCards(
 ): StatCard[] {
   if (!latest) {
     return [
-      { label: "Conversion rate", value: "—", trend: null, hero: true },
-      { label: "Sessions", value: "—", trend: null },
-      { label: "Avg. session time", value: "—", trend: null },
+      { label: "Conversion rate", value: null, trend: null, hero: true },
+      { label: "Sessions", value: null, trend: null },
+      { label: "Avg. session time", value: null, trend: null },
       {
         label: "Drop-off rate",
-        value: "—",
+        value: null,
         trend: null,
         invertColors: true,
       },
@@ -83,7 +85,7 @@ function buildStatCards(
   return [
     {
       label: "Conversion rate",
-      value: conversion == null ? "—" : `${conversion}%`,
+      value: conversion == null ? null : `${conversion}%`,
       trend:
         conversion != null && prevConversion != null
           ? percentChange(conversion, prevConversion)
@@ -110,7 +112,7 @@ function buildStatCards(
     },
     {
       label: "Drop-off rate",
-      value: dropOff == null ? "—" : `${dropOff}%`,
+      value: dropOff == null ? null : `${dropOff}%`,
       trend:
         dropOff != null && prevDropOff != null
           ? percentChange(dropOff, prevDropOff)
@@ -155,6 +157,57 @@ function keyInsightText(report: ReportDisplay): string {
   return insights.anomaly?.trim() || insights.summary;
 }
 
+function StatCardView({
+  stat,
+}: {
+  stat: StatCard;
+}) {
+  const isHero = Boolean(stat.hero);
+
+  return (
+    <div
+      className={
+        isHero
+          ? "rounded-lg border border-zinc-300 bg-white px-5 py-5 shadow-sm sm:col-span-2 lg:col-span-1"
+          : "rounded-lg border border-zinc-200 bg-white px-4 py-4 shadow-sm"
+      }
+    >
+      <p
+        className={
+          isHero
+            ? "text-xs font-medium text-zinc-500"
+            : "text-xs text-zinc-500"
+        }
+      >
+        {stat.label}
+      </p>
+      {stat.value != null ? (
+        <p
+          className={
+            isHero
+              ? "mt-2 text-4xl font-semibold tracking-tight text-zinc-900"
+              : "mt-1 text-xl font-semibold text-zinc-900"
+          }
+        >
+          {stat.value}
+        </p>
+      ) : (
+        <EmptyStatValue hero={isHero} />
+      )}
+      {stat.trend ? (
+        <div className={isHero ? "mt-3" : "mt-2"}>
+          <TrendIndicator
+            trend={stat.trend.trend}
+            value={stat.trend.value}
+            className={isHero ? "text-sm" : "text-xs"}
+            invertColors={stat.invertColors}
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function DashboardWithReports({
   latestReport,
   previousMetrics,
@@ -174,65 +227,45 @@ export function DashboardWithReports({
   return (
     <div className="mb-8 space-y-5">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border border-zinc-300 bg-white px-5 py-5 shadow-sm sm:col-span-2 lg:col-span-1">
-          <p className="text-xs font-medium text-zinc-500">{heroStat.label}</p>
-          <p className="mt-2 text-4xl font-semibold tracking-tight text-zinc-900">
-            {heroStat.value}
-          </p>
-          {heroStat.trend ? (
-            <div className="mt-3">
-              <TrendIndicator
-                trend={heroStat.trend.trend}
-                value={heroStat.trend.value}
-                className="text-sm"
-              />
-            </div>
-          ) : null}
-        </div>
-
+        <StatCardView stat={heroStat} />
         {secondaryStats.map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-lg border border-zinc-200 bg-white px-4 py-4 shadow-sm"
-          >
-            <p className="text-xs text-zinc-500">{stat.label}</p>
-            <p className="mt-1 text-xl font-semibold text-zinc-900">
-              {stat.value}
-            </p>
-            {stat.trend ? (
-              <div className="mt-2">
-                <TrendIndicator
-                  trend={stat.trend.trend}
-                  value={stat.trend.value}
-                  className="text-xs"
-                  invertColors={stat.invertColors}
-                />
-              </div>
-            ) : null}
-          </div>
+          <StatCardView key={stat.label} stat={stat} />
         ))}
       </div>
 
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-medium text-zinc-900">Last analysis</p>
-        <p className="mt-1 text-sm text-zinc-500">
-          Last updated: {formatShortDate(latestReport.dateISO)}
-        </p>
-        {comparison ? (
-          <>
-            <p className="mt-3 text-base text-zinc-800">{comparison.message}</p>
-            <div className="mt-4">
-              <TrendIndicator
-                trend={comparison.trend}
-                value={comparison.value}
-              />
-            </div>
-          </>
-        ) : (
-          <p className="mt-3 text-base text-zinc-800">
-            First report — no comparison yet
-          </p>
-        )}
+        <div className="flex flex-col items-start justify-between gap-6 sm:flex-row">
+          <div className="flex-1">
+            <p className="text-sm font-medium text-zinc-900">Last analysis</p>
+            <p className="mt-1 text-sm text-zinc-500">
+              Last updated: {formatShortDate(latestReport.dateISO)}
+            </p>
+            {comparison ? (
+              <>
+                <p className="mt-3 text-base text-zinc-800">
+                  {comparison.message}
+                </p>
+                <div className="mt-4">
+                  <TrendIndicator
+                    trend={comparison.trend}
+                    value={comparison.value}
+                  />
+                </div>
+              </>
+            ) : (
+              <p className="mt-3 text-base text-zinc-800">
+                First report — no comparison yet
+              </p>
+            )}
+          </div>
+          <div className="w-full shrink-0 sm:w-56 sm:pt-1">
+            <p className="mb-2 text-right text-xs text-zinc-400">Funnel</p>
+            <FunnelChart
+              steps={latestReport.metrics?.funnel ?? []}
+              compact
+            />
+          </div>
+        </div>
       </div>
 
       <div className="flex gap-3 rounded-lg border border-zinc-300 bg-zinc-100 px-4 py-4">

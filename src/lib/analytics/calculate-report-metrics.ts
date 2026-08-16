@@ -64,6 +64,9 @@ function groupEventsBySession(
   return sessions;
 }
 
+/** Match Reports' "Check tracking" threshold for implausible durations. */
+const MAX_SESSION_DURATION_MS = 60 * 60 * 1000;
+
 function calculateUserBehavior(sessions: Map<string, AnalyticsEvent[]>) {
   const sessionCount = sessions.size;
   const durations: number[] = [];
@@ -72,7 +75,8 @@ function calculateUserBehavior(sessions: Map<string, AnalyticsEvent[]>) {
     const timestamps = sessionEvents.map((event) => Date.parse(event.timestamp));
     const min = Math.min(...timestamps);
     const max = Math.max(...timestamps);
-    durations.push(Math.max(0, max - min));
+    const rawMs = Math.max(0, max - min);
+    durations.push(Math.min(rawMs, MAX_SESSION_DURATION_MS));
   }
 
   const avgDurationMs =

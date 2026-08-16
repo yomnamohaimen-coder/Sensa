@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { EmptyChartPlaceholder } from "@/components/empty-states";
 
 export type TrendPoint = {
   label: string;
@@ -44,10 +45,8 @@ export function SevenDayTrendChart({
 
   if (data.length === 0) {
     return (
-      <div className="flex h-36 w-full min-w-[200px] items-center justify-center sm:w-64">
-        <p className="px-2 text-center text-xs leading-5 text-zinc-500">
-          Not enough data yet for a trend
-        </p>
+      <div className="w-full min-w-[200px] sm:w-64">
+        <EmptyChartPlaceholder message="Not enough data yet for a trend" />
       </div>
     );
   }

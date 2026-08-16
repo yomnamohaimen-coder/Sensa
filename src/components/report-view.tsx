@@ -1,4 +1,6 @@
 import { TrendIndicator } from "@/components/dashboard-metrics";
+import { EmptyChartPlaceholder } from "@/components/empty-states";
+import { FunnelChart } from "@/components/funnel-chart";
 import type { CalculatedReportMetrics } from "@/lib/analytics/calculate-report-metrics";
 import {
   parseDurationMs,
@@ -27,7 +29,7 @@ function Section({
 }
 
 function NoDataMessage() {
-  return <p className="text-sm text-zinc-500">No data available</p>;
+  return <EmptyChartPlaceholder message="No data available" />;
 }
 
 function MetricWarning({ label }: { label: string }) {
@@ -181,38 +183,7 @@ export function ReportView({
 
       <Section title="Usage funnel">
         {metrics ? (
-          <div className="space-y-3">
-            {metrics.funnel.map((step, index) => {
-              const firstCount = metrics.funnel[0]?.count ?? 0;
-              const ratio =
-                firstCount > 0 ? Math.min(step.count / firstCount, 1) : 0;
-              const widthPercent =
-                step.count <= 0 || firstCount <= 0 ? 0 : ratio * 100;
-              const barColors = ["bg-zinc-800", "bg-zinc-600", "bg-zinc-400"];
-
-              return (
-                <div key={step.step}>
-                  <div className="mb-1 flex items-center justify-between text-sm">
-                    <span className="font-medium text-zinc-800">{step.step}</span>
-                    <span className="text-zinc-500">
-                      {step.count.toLocaleString()} sessions
-                      {step.dropOff !== "—" && ` · ${step.dropOff} drop-off`}
-                    </span>
-                  </div>
-                  <div className="h-2 rounded-full bg-zinc-100">
-                    <div
-                      className={`h-2 rounded-full ${barColors[index] ?? "bg-zinc-400"}`}
-                      style={{
-                        width: `${widthPercent}%`,
-                        minWidth:
-                          step.count <= 0 || firstCount <= 0 ? "4px" : undefined,
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <FunnelChart steps={metrics.funnel} />
         ) : (
           <NoDataMessage />
         )}
