@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { TrendIndicator } from "@/components/dashboard-metrics";
 import { EmptyStatValue } from "@/components/empty-states";
-import { FunnelChart } from "@/components/funnel-chart";
+import { MiniConversionDonut } from "@/components/mini-conversion-donut";
 import type { CalculatedReportMetrics } from "@/lib/analytics/calculate-report-metrics";
 import {
   parseDurationMs,
@@ -259,10 +259,8 @@ export function DashboardWithReports({
             )}
           </div>
           <div className="w-full shrink-0 sm:w-56 sm:pt-1">
-            <p className="mb-2 text-right text-xs text-zinc-400">Funnel</p>
-            <FunnelChart
+            <MiniConversionDonut
               steps={latestReport.metrics?.funnel ?? []}
-              compact
             />
           </div>
         </div>

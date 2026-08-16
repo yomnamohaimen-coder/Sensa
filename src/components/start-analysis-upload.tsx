@@ -137,7 +137,7 @@ export function StartAnalysisUpload() {
         onClick={handleStartClick}
         className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
       >
-        Start new analysis
+        Upload CSV
       </button>
 
       {isExpanded && (

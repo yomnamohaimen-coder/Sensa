@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { DashboardWithReports } from "@/components/dashboard-with-reports";
 import { RecurringAnalysisChecker } from "@/components/recurring-analysis-checker";
-import { StartAnalysisUpload } from "@/components/start-analysis-upload";
 import { buildReportDisplay } from "@/lib/reports/build-report-display";
 import { getUserReports } from "@/lib/reports/get-reports";
 import { createClient } from "@/utils/supabase/server";
@@ -51,8 +50,6 @@ export default async function DashboardPage() {
           </p>
         </div>
       )}
-
-      <StartAnalysisUpload />
     </div>
   );
 }
