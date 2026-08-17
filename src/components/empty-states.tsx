@@ -3,8 +3,8 @@ export function EmptyStatValue({ hero = false }: { hero?: boolean }) {
     <p
       className={
         hero
-          ? "mt-2 text-base font-normal text-zinc-400"
-          : "mt-1 text-sm font-normal text-zinc-400"
+          ? "mt-2 text-base font-normal text-zinc-500"
+          : "mt-1 text-sm font-normal text-zinc-500"
       }
     >
       No data yet
@@ -31,7 +31,7 @@ export function EmptyChartPlaceholder({
       <div className="flex flex-col items-center gap-1.5 text-center">
         <svg
           aria-hidden="true"
-          className="h-4 w-4 text-zinc-300"
+          className="h-4 w-4 text-zinc-400"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={1.5}
@@ -43,7 +43,7 @@ export function EmptyChartPlaceholder({
             d="M3 13.5l4.5-4.5 3.75 3.75L16.5 6 21 10.5M3 18h18"
           />
         </svg>
-        <p className="text-xs leading-5 text-zinc-400">{message}</p>
+        <p className="text-xs leading-5 text-zinc-500">{message}</p>
       </div>
     </div>
   );

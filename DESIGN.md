@@ -143,7 +143,7 @@ A cool neutral zinc scale carries almost all UI; teal/emerald and red appear onl
 - **Stroke** (#d4d4d8): Input borders at rest.
 - **Ink Secondary** (#3f3f46): Secondary labels / medium emphasis.
 - **Ink Muted** (#71717a): Helper text, flat trends, secondary copy.
-- **Ink Faint** (#a1a1aa): Empty-state copy, placeholders, chart meta.
+- **Ink Faint** (#a1a1aa): Non-text decoration only (icons, inactive chrome). Do not use for readable copy — prefer Ink Muted.
 
 ### Named Rules
 **The Meaning-Only Color Rule.** Decorative color is banned. Green / teal / red appear only when they encode meaning (positive trend, conversion, danger/error). Otherwise stay in zinc.
@@ -227,8 +227,8 @@ Character: **refined and restrained**.
 - Logout mirrors inactive nav item styling
 
 ### Empty states
-- Stat empties: label remains; value becomes lighter “No data yet” (not a bold em dash)
-- Chart empties: dashed Hairline box, centered muted copy + small chart icon
+- Stat empties: label remains; value becomes “No data yet” in Ink Muted (`text-zinc-500`), not a bold em dash
+- Chart empties: dashed Hairline box, centered Ink Muted copy + decorative icon
 
 ### Signature: Mini conversion donut
 - Deep Teal full ring + Mint Arc completion arc; center percent in Ink

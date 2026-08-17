@@ -63,7 +63,11 @@ export function RecurringAnalysisChecker() {
   }
 
   return (
-    <div className="mb-6 rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-600 shadow-sm">
+    <div
+      className="mb-6 rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-600 shadow-sm"
+      role="status"
+      aria-live="polite"
+    >
       Generating a new analysis from recent tracking data…
     </div>
   );

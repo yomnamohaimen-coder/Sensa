@@ -31,7 +31,7 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col px-6 py-10">
       <header className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="break-words text-2xl font-semibold tracking-tight text-zinc-900">
           {welcomeMessage}
         </h1>
       </header>

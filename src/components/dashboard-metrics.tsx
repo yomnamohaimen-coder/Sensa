@@ -30,12 +30,16 @@ export function TrendIndicator({
     flat: "→",
   };
 
+  const directionWord =
+    trend === "up" ? "up" : trend === "down" ? "down" : "unchanged";
+
   return (
     <span
       className={`inline-flex items-center gap-1 font-medium ${styles[colorTrend]} ${className}`}
+      aria-label={`${directionWord} ${value}`}
     >
       <span aria-hidden="true">{arrows[trend]}</span>
-      {value}
+      <span aria-hidden="true">{value}</span>
     </span>
   );
 }

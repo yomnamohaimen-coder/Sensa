@@ -29,9 +29,14 @@ export function MiniConversionDonut({ steps }: { steps: FunnelStep[] }) {
   const percent = Math.round(ratio * 100);
   const completedLength = CIRCUMFERENCE * ratio;
   const remainingLength = CIRCUMFERENCE - completedLength;
+  const accessibleLabel = `Conversion ${percent}%. ${first.step} ${first.count.toLocaleString()}, ${last.step} ${last.count.toLocaleString()}.`;
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div
+      className="flex flex-col items-center gap-3"
+      role="img"
+      aria-label={accessibleLabel}
+    >
       <div className="relative" style={{ width: SIZE, height: SIZE }}>
         <svg
           width={SIZE}
@@ -70,39 +75,43 @@ export function MiniConversionDonut({ steps }: { steps: FunnelStep[] }) {
             />
           ) : null}
         </svg>
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+        <div
+          className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center"
+          aria-hidden="true"
+        >
           <span className="text-lg font-semibold tabular-nums tracking-tight text-zinc-900">
             {percent}%
           </span>
-          <span className="text-[10px] font-medium uppercase tracking-wide text-zinc-400">
+          <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
             converted
           </span>
         </div>
       </div>
 
-      <ul className="flex w-full flex-col items-center gap-1.5 text-xs text-zinc-600">
-        <li className="flex items-center gap-2">
+      <ul
+        className="flex w-full flex-col items-center gap-1.5 text-xs text-zinc-600"
+        aria-hidden="true"
+      >
+        <li className="flex max-w-full items-center gap-2">
           <span
             className="h-2 w-2 shrink-0 rounded-full"
             style={{ backgroundColor: RING_TRACK }}
-            aria-hidden="true"
           />
-          <span>
+          <span className="min-w-0 truncate">
             {first.step}{" "}
-            <span className="tabular-nums text-zinc-400">
+            <span className="tabular-nums text-zinc-500">
               ({first.count.toLocaleString()})
             </span>
           </span>
         </li>
-        <li className="flex items-center gap-2">
+        <li className="flex max-w-full items-center gap-2">
           <span
             className="h-2 w-2 shrink-0 rounded-full"
             style={{ backgroundColor: RING_FILL }}
-            aria-hidden="true"
           />
-          <span>
+          <span className="min-w-0 truncate">
             {last.step}{" "}
-            <span className="tabular-nums text-zinc-400">
+            <span className="tabular-nums text-zinc-500">
               ({last.count.toLocaleString()})
             </span>
           </span>
