@@ -29,7 +29,15 @@ export function ReportsPageContent({
   const previousReport =
     selectedIndex >= 0 ? reports[selectedIndex + 1] : undefined;
 
+  const dateRangeInvalid = Boolean(
+    startDate && endDate && endDate < startDate,
+  );
+
   const filteredReports = useMemo(() => {
+    if (dateRangeInvalid) {
+      return [];
+    }
+
     return reports.filter((report) => {
       if (startDate && report.dateISO < startDate) {
         return false;
@@ -39,7 +47,7 @@ export function ReportsPageContent({
       }
       return true;
     });
-  }, [reports, startDate, endDate]);
+  }, [reports, startDate, endDate, dateRangeInvalid]);
 
   function handleSelectReport(reportId: string) {
     setSelectedReportId(reportId);
@@ -64,15 +72,11 @@ export function ReportsPageContent({
 
       <div className="mb-12">
         {selectedReport ? (
-          <>
-            <p className="mb-4 text-xs font-medium uppercase tracking-wide text-zinc-400">
-              {isMostRecent ? "Most recent report" : "Selected report"}
-            </p>
-            <ReportView
-              report={selectedReport}
-              previousMetrics={previousReport?.metrics ?? null}
-            />
-          </>
+          <ReportView
+            report={selectedReport}
+            previousMetrics={previousReport?.metrics ?? null}
+            contextLabel={isMostRecent ? "Most recent" : undefined}
+          />
         ) : (
           <div className="rounded-lg border border-dashed border-zinc-200 bg-white px-6 py-10 text-center">
             <p className="text-sm text-zinc-600">
@@ -102,7 +106,12 @@ export function ReportsPageContent({
               id="start-date"
               type="date"
               value={startDate}
+              max={endDate || undefined}
               onChange={(event) => setStartDate(event.target.value)}
+              aria-invalid={dateRangeInvalid}
+              aria-describedby={
+                dateRangeInvalid ? "report-date-range-error" : undefined
+              }
               className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
             />
           </div>
@@ -117,11 +126,26 @@ export function ReportsPageContent({
               id="end-date"
               type="date"
               value={endDate}
+              min={startDate || undefined}
               onChange={(event) => setEndDate(event.target.value)}
+              aria-invalid={dateRangeInvalid}
+              aria-describedby={
+                dateRangeInvalid ? "report-date-range-error" : undefined
+              }
               className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
             />
           </div>
         </div>
+
+        {dateRangeInvalid ? (
+          <p
+            id="report-date-range-error"
+            role="alert"
+            className="mt-2 text-sm text-red-600"
+          >
+            From must be on or before To.
+          </p>
+        ) : null}
 
         <ul className="mt-6 max-h-[400px] divide-y divide-zinc-200 overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
           {filteredReports.length > 0 ? (
@@ -133,14 +157,17 @@ export function ReportsPageContent({
                   <button
                     type="button"
                     onClick={() => handleSelectReport(report.id)}
-                    className={`flex w-full items-center justify-between px-5 py-4 text-left transition-colors ${
+                    aria-current={isSelected ? "true" : undefined}
+                    className={`flex w-full min-w-0 items-center justify-between gap-3 px-5 py-4 text-left transition-colors ${
                       isSelected ? "bg-zinc-100" : "hover:bg-zinc-50"
                     }`}
                   >
-                    <span className="text-sm font-medium text-zinc-900">
+                    <span className="min-w-0 truncate text-sm font-medium text-zinc-900">
                       {report.label}
                     </span>
-                    <span className="text-sm text-zinc-500">{report.date}</span>
+                    <span className="shrink-0 text-sm text-zinc-500">
+                      {report.date}
+                    </span>
                   </button>
                 </li>
               );
@@ -149,7 +176,9 @@ export function ReportsPageContent({
             <li className="px-5 py-8 text-center text-sm text-zinc-500">
               {reports.length === 0
                 ? "No reports yet."
-                : "No reports match this date range."}
+                : dateRangeInvalid
+                  ? "Choose a valid date range to see matching reports."
+                  : "No reports match this date range."}
             </li>
           )}
         </ul>

@@ -35,7 +35,7 @@ function NoDataMessage() {
 function MetricWarning({ label }: { label: string }) {
   return (
     <span className="inline-flex align-middle" title={label}>
-      <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
+      <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-800">
         Check tracking
       </span>
       <span className="sr-only">{label}</span>
@@ -75,9 +75,11 @@ function MetricValue({
 export function ReportView({
   report,
   previousMetrics = null,
+  contextLabel,
 }: {
   report: ReportDisplay;
   previousMetrics?: CalculatedReportMetrics | null;
+  contextLabel?: string;
 }) {
   const metrics = report.metrics;
   const prev = previousMetrics;
@@ -117,8 +119,12 @@ export function ReportView({
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold text-zinc-900">{report.label}</h2>
-        <p className="mt-1 text-sm text-zinc-500">{report.date}</p>
+        <h2 className="min-w-0 break-words text-lg font-semibold text-zinc-900">
+          {report.label}
+        </h2>
+        <p className="mt-1 text-sm text-zinc-500">
+          {contextLabel ? `${contextLabel} · ${report.date}` : report.date}
+        </p>
       </div>
 
       <Section title="User behavior tracking">
@@ -142,7 +148,7 @@ export function ReportView({
             <div>
               <dt className="text-xs text-zinc-500">
                 Unique users
-                <span className="mt-0.5 block font-normal text-zinc-400">
+                <span className="mt-0.5 block font-normal text-zinc-500">
                   (by session)
                 </span>
               </dt>

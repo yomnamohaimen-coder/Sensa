@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createReportFromUpload } from "@/app/actions/create-report-from-upload";
 
@@ -34,6 +34,7 @@ function Spinner() {
 
 export function StartAnalysisUpload() {
   const router = useRouter();
+  const panelId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const collapseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -159,13 +160,17 @@ export function StartAnalysisUpload() {
         type="button"
         onClick={handleToggleClick}
         aria-expanded={isExpanded}
+        aria-controls={panelId}
         className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
       >
         Upload CSV
       </button>
 
       {isExpanded && (
-        <div className="mt-4 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+        <div
+          id={panelId}
+          className="mt-4 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm"
+        >
           <p className="mb-1.5 text-sm font-medium text-zinc-700">
             Upload event data (.csv)
           </p>
@@ -197,7 +202,7 @@ export function StartAnalysisUpload() {
             {selectedFile ? (
               <div className="flex min-w-0 items-center gap-2 rounded-md border border-green-200 bg-green-50 px-3 py-2">
                 <span
-                  className="shrink-0 rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-green-700"
+                  className="shrink-0 rounded bg-green-100 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-green-700"
                   aria-hidden="true"
                 >
                   CSV
@@ -207,7 +212,7 @@ export function StartAnalysisUpload() {
                 </p>
               </div>
             ) : (
-              <p className="text-sm text-zinc-400">No file chosen</p>
+              <p className="text-sm text-zinc-500">No file chosen</p>
             )}
           </div>
 
