@@ -155,21 +155,23 @@ export function StartAnalysisUpload() {
   }
 
   return (
-    <div>
-      <button
-        type="button"
-        onClick={handleToggleClick}
-        aria-expanded={isExpanded}
-        aria-controls={panelId}
-        className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
-      >
-        Upload CSV
-      </button>
+    <div className="contents">
+      <div className="sm:col-start-2 sm:row-start-1 sm:justify-self-end sm:pt-0.5">
+        <button
+          type="button"
+          onClick={handleToggleClick}
+          aria-expanded={isExpanded}
+          aria-controls={panelId}
+          className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+        >
+          Upload CSV
+        </button>
+      </div>
 
       {isExpanded && (
         <div
           id={panelId}
-          className="mt-4 rounded-lg border border-zinc-200 bg-white p-5 shadow-sm"
+          className="col-span-full rounded-lg border border-zinc-200 bg-white p-5 shadow-sm"
         >
           <p className="mb-1.5 text-sm font-medium text-zinc-700">
             Upload event data (.csv)

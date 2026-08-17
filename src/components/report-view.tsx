@@ -22,7 +22,7 @@ function Section({
 }) {
   return (
     <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-zinc-900">{title}</h3>
+      <h3 className="text-base font-semibold text-zinc-900">{title}</h3>
       <div className="mt-4">{children}</div>
     </section>
   );
@@ -117,7 +117,7 @@ export function ReportView({
       : null;
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-5">
       <div>
         <h2 className="min-w-0 break-words text-lg font-semibold text-zinc-900">
           {report.label}
@@ -127,10 +127,40 @@ export function ReportView({
         </p>
       </div>
 
+      <Section title="AI insights">
+        {report.aiInsights ? (
+          <div className="flex flex-col gap-4 text-sm">
+            <p className="max-w-prose leading-6 text-zinc-700">
+              {report.aiInsights.summary}
+            </p>
+            {report.aiInsights.anomaly && (
+              <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-900">
+                <span className="font-medium">Anomaly:</span>{" "}
+                {report.aiInsights.anomaly}
+              </div>
+            )}
+            <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-zinc-700">
+              <span className="font-medium text-zinc-900">Recommendation:</span>{" "}
+              {report.aiInsights.recommendation}
+            </div>
+          </div>
+        ) : (
+          <NoDataMessage />
+        )}
+      </Section>
+
+      <Section title="Usage funnel">
+        {metrics ? (
+          <FunnelChart steps={metrics.funnel} />
+        ) : (
+          <NoDataMessage />
+        )}
+      </Section>
+
       <Section title="User behavior tracking">
         {metrics ? (
-          <dl className="grid gap-4 sm:grid-cols-3">
-            <div>
+          <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="min-w-0">
               <dt className="text-xs text-zinc-500">Sessions</dt>
               <MetricValue
                 display={metrics.userBehavior.sessions.toLocaleString()}
@@ -145,7 +175,7 @@ export function ReportView({
                 }
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <dt className="text-xs text-zinc-500">
                 Unique users
                 <span className="mt-0.5 block font-normal text-zinc-500">
@@ -165,7 +195,7 @@ export function ReportView({
                 }
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <dt className="text-xs text-zinc-500">Avg. session duration</dt>
               <MetricValue
                 display={metrics.userBehavior.avgSessionDuration}
@@ -187,18 +217,10 @@ export function ReportView({
         )}
       </Section>
 
-      <Section title="Usage funnel">
-        {metrics ? (
-          <FunnelChart steps={metrics.funnel} />
-        ) : (
-          <NoDataMessage />
-        )}
-      </Section>
-
       <Section title="Engagement metrics">
         {metrics ? (
-          <dl className="grid gap-4 sm:grid-cols-3">
-            <div>
+          <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="min-w-0">
               <dt className="text-xs text-zinc-500">Avg. time on page</dt>
               <MetricValue
                 display={metrics.engagement.avgTimeOnPage}
@@ -213,7 +235,7 @@ export function ReportView({
                 }
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <dt className="text-xs text-zinc-500">Bounce rate</dt>
               <MetricValue
                 display={metrics.engagement.bounceRate}
@@ -229,7 +251,7 @@ export function ReportView({
                 }
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <dt className="text-xs text-zinc-500">Pages per session</dt>
               <MetricValue
                 display={metrics.engagement.pagesPerSession}
@@ -245,28 +267,6 @@ export function ReportView({
               />
             </div>
           </dl>
-        ) : (
-          <NoDataMessage />
-        )}
-      </Section>
-
-      <Section title="AI insights">
-        {report.aiInsights ? (
-          <div className="space-y-4 text-sm">
-            <p className="leading-6 text-zinc-700">
-              {report.aiInsights.summary}
-            </p>
-            {report.aiInsights.anomaly && (
-              <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-900">
-                <span className="font-medium">Anomaly:</span>{" "}
-                {report.aiInsights.anomaly}
-              </div>
-            )}
-            <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-zinc-700">
-              <span className="font-medium text-zinc-900">Recommendation:</span>{" "}
-              {report.aiInsights.recommendation}
-            </div>
-          </div>
         ) : (
           <NoDataMessage />
         )}
