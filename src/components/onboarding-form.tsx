@@ -24,7 +24,7 @@ const FOCUS_AREAS = [
 const TEAM_SIZES = ["Just me", "2-10", "11-50", "50+"] as const;
 
 const inputClassName =
-  "w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500";
+  "w-full rounded-md border border-stroke px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-ink-muted focus:ring-1 focus:ring-ink-muted";
 
 type OnboardingAnswers = {
   productName: string;
@@ -132,20 +132,20 @@ export function OnboardingForm() {
   return (
     <div className="w-full max-w-lg">
       <div className="mb-8 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
           Welcome to Sensa
         </h1>
-        <p className="mt-2 text-sm text-zinc-500">
+        <p className="mt-2 text-sm text-ink-muted">
           Tell us a bit about your product — all questions are optional.
         </p>
       </div>
 
-      <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+      <div className="rounded-lg border border-hairline bg-surface p-6 shadow-sm">
         <form onSubmit={handleContinue} className="space-y-5">
           <div>
             <label
               htmlFor="product-name"
-              className="mb-1.5 block text-sm font-medium text-zinc-700"
+              className="mb-1.5 block text-sm font-medium text-ink-secondary"
             >
               What&apos;s your product or website called?
             </label>
@@ -162,7 +162,7 @@ export function OnboardingForm() {
           <div>
             <label
               htmlFor="industry"
-              className="mb-1.5 block text-sm font-medium text-zinc-700"
+              className="mb-1.5 block text-sm font-medium text-ink-secondary"
             >
               What&apos;s your industry?
             </label>
@@ -191,20 +191,20 @@ export function OnboardingForm() {
           </div>
 
           <fieldset>
-            <legend className="mb-2 block text-sm font-medium text-zinc-700">
+            <legend className="mb-2 block text-sm font-medium text-ink-secondary">
               What do you want to measure with this tool?
             </legend>
             <div className="space-y-2">
               {FOCUS_AREAS.map((area) => (
                 <label
                   key={area}
-                  className="flex cursor-pointer items-center gap-2.5 text-sm text-zinc-700"
+                  className="flex cursor-pointer items-center gap-2.5 text-sm text-ink-secondary"
                 >
                   <input
                     type="checkbox"
                     checked={focusAreas.includes(area)}
                     onChange={() => toggleFocusArea(area)}
-                    className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500"
+                    className="h-4 w-4 rounded border-stroke text-ink focus:ring-ink-muted"
                   />
                   {area}
                 </label>
@@ -215,7 +215,7 @@ export function OnboardingForm() {
           <div>
             <label
               htmlFor="team-size"
-              className="mb-1.5 block text-sm font-medium text-zinc-700"
+              className="mb-1.5 block text-sm font-medium text-ink-secondary"
             >
               What&apos;s your team size?
             </label>
@@ -240,7 +240,7 @@ export function OnboardingForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-md bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-md bg-ink px-4 py-2.5 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? "Saving..." : "Continue"}
             </button>
@@ -248,7 +248,7 @@ export function OnboardingForm() {
               type="button"
               onClick={handleSkip}
               disabled={isSubmitting}
-              className="text-sm text-zinc-500 transition-colors hover:text-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="text-sm text-ink-muted transition-colors hover:text-ink-secondary disabled:cursor-not-allowed disabled:opacity-60"
             >
               Skip
             </button>

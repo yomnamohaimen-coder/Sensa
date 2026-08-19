@@ -144,23 +144,23 @@ export function AuthForm() {
   return (
     <div className="w-full max-w-sm">
       <div className="mb-8 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
           Sensa
         </h1>
-        <p className="mt-2 text-sm text-zinc-500">
+        <p className="mt-2 text-sm text-ink-muted">
           User behavior analytics for product teams
         </p>
       </div>
 
-      <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <div className="mb-6 flex rounded-md bg-zinc-100 p-1">
+      <div className="rounded-lg border border-hairline bg-surface p-6 shadow-sm">
+        <div className="mb-6 flex rounded-md bg-raised p-1">
           <button
             type="button"
             onClick={() => switchMode("login")}
             className={`flex-1 rounded px-3 py-2 text-sm font-medium transition-colors ${
               mode === "login"
-                ? "bg-white text-zinc-900 shadow-sm"
-                : "text-zinc-500 hover:text-zinc-700"
+                ? "bg-surface text-ink shadow-sm"
+                : "text-ink-muted hover:text-ink-secondary"
             }`}
           >
             Log in
@@ -170,8 +170,8 @@ export function AuthForm() {
             onClick={() => switchMode("signup")}
             className={`flex-1 rounded px-3 py-2 text-sm font-medium transition-colors ${
               mode === "signup"
-                ? "bg-white text-zinc-900 shadow-sm"
-                : "text-zinc-500 hover:text-zinc-700"
+                ? "bg-surface text-ink shadow-sm"
+                : "text-ink-muted hover:text-ink-secondary"
             }`}
           >
             Sign up
@@ -182,7 +182,7 @@ export function AuthForm() {
           <div>
             <label
               htmlFor="email"
-              className="mb-1.5 block text-sm font-medium text-zinc-700"
+              className="mb-1.5 block text-sm font-medium text-ink-secondary"
             >
               Email
             </label>
@@ -192,7 +192,7 @@ export function AuthForm() {
               autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
+              className="w-full rounded-md border border-stroke px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-ink-muted focus:ring-1 focus:ring-ink-muted"
               placeholder="you@company.com"
             />
             {errors.email && (
@@ -203,7 +203,7 @@ export function AuthForm() {
           <div>
             <label
               htmlFor="password"
-              className="mb-1.5 block text-sm font-medium text-zinc-700"
+              className="mb-1.5 block text-sm font-medium text-ink-secondary"
             >
               Password
             </label>
@@ -215,7 +215,7 @@ export function AuthForm() {
               }
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
+              className="w-full rounded-md border border-stroke px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-ink-muted focus:ring-1 focus:ring-ink-muted"
               placeholder="••••••••"
             />
             {errors.password && (
@@ -230,7 +230,7 @@ export function AuthForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-md bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-md bg-ink px-4 py-2.5 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting
               ? mode === "signup"

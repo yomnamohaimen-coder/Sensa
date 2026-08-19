@@ -7,16 +7,16 @@ export default function HeatmapTestPage() {
   return (
     <div className="mx-auto flex w-full max-w-[1600px] flex-col px-6 py-10">
       <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
           Heatmap test
         </h1>
-        <p className="mt-2 text-sm text-zinc-500">
+        <p className="mt-2 text-sm text-ink-muted">
           Temporary QA page for{" "}
-          <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs text-zinc-700">
+          <code className="rounded bg-raised px-1 py-0.5 text-xs text-ink-secondary">
             ListingPageHeatmap
           </code>{" "}
           using report{" "}
-          <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs text-zinc-700">
+          <code className="rounded bg-raised px-1 py-0.5 text-xs text-ink-secondary">
             {TEST_REPORT_ID}
           </code>
           .

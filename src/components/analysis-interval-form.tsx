@@ -15,7 +15,7 @@ type AnalysisIntervalFormProps = {
 };
 
 const inputClassName =
-  "rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-400";
+  "rounded-md border border-stroke bg-surface px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-ink-muted focus:ring-1 focus:ring-ink-muted disabled:cursor-not-allowed disabled:bg-canvas disabled:text-ink-faint";
 
 export function AnalysisIntervalForm({
   initialIntervalDays,
@@ -80,17 +80,17 @@ export function AnalysisIntervalForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm"
+      className="rounded-lg border border-hairline bg-surface p-5 shadow-sm"
       noValidate
     >
-      <h2 className="text-base font-semibold text-zinc-900">
+      <h2 className="text-base font-semibold text-ink">
         Automatic analysis
       </h2>
-      <p className="mt-1 text-sm text-zinc-500">
+      <p className="mt-1 text-sm text-ink-muted">
         Choose how often Sensa should turn new tracking data into a report.
       </p>
 
-      <label className="mt-5 flex items-center gap-2 text-sm text-zinc-700">
+      <label className="mt-5 flex items-center gap-2 text-sm text-ink-secondary">
         <input
           type="checkbox"
           checked={manualOnly}
@@ -98,13 +98,13 @@ export function AnalysisIntervalForm({
             setManualOnly(event.target.checked);
             setSaved(false);
           }}
-          className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500"
+          className="h-4 w-4 rounded border-stroke text-ink focus:ring-ink-muted"
         />
         Manually only
       </label>
 
       <div className="mt-4">
-        <p className="mb-1.5 text-sm font-medium text-zinc-700">
+        <p className="mb-1.5 text-sm font-medium text-ink-secondary">
           Generate new analysis every
         </p>
         <div className="flex flex-wrap items-center gap-2">
@@ -157,7 +157,7 @@ export function AnalysisIntervalForm({
         <button
           type="submit"
           disabled={isSaving}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSaving ? "Saving…" : "Save"}
         </button>

@@ -9,7 +9,7 @@ const SUCCESS_MESSAGE_DURATION_MS = 1500;
 function Spinner() {
   return (
     <svg
-      className="h-4 w-4 animate-spin text-white"
+      className="h-4 w-4 animate-spin text-on-ink"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -162,7 +162,7 @@ export function StartAnalysisUpload() {
           onClick={handleToggleClick}
           aria-expanded={isExpanded}
           aria-controls={panelId}
-          className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+          className="inline-flex items-center justify-center rounded-md bg-ink px-5 py-2.5 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover"
         >
           Upload CSV
         </button>
@@ -171,12 +171,12 @@ export function StartAnalysisUpload() {
       {isExpanded && (
         <div
           id={panelId}
-          className="col-span-full rounded-lg border border-zinc-200 bg-white p-5 shadow-sm"
+          className="col-span-full rounded-lg border border-hairline bg-surface p-5 shadow-sm"
         >
-          <p className="mb-1.5 text-sm font-medium text-zinc-700">
+          <p className="mb-1.5 text-sm font-medium text-ink-secondary">
             Upload event data (.csv)
           </p>
-          <p className="mb-3 text-xs text-zinc-500">
+          <p className="mb-3 text-xs text-ink-muted">
             Required columns: session_id, event_type, timestamp, page, device,
             metadata
           </p>
@@ -184,7 +184,7 @@ export function StartAnalysisUpload() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <label
               htmlFor="analysis-csv-upload"
-              className={`inline-flex w-fit cursor-pointer items-center justify-center rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 ${
+              className={`inline-flex w-fit cursor-pointer items-center justify-center rounded-md border border-stroke bg-surface px-3 py-2 text-sm font-medium text-ink-secondary transition-colors hover:bg-canvas ${
                 isAnalyzing || showSuccess
                   ? "pointer-events-none opacity-60"
                   : ""
@@ -214,7 +214,7 @@ export function StartAnalysisUpload() {
                 </p>
               </div>
             ) : (
-              <p className="text-sm text-zinc-500">No file chosen</p>
+              <p className="text-sm text-ink-muted">No file chosen</p>
             )}
           </div>
 
@@ -239,7 +239,7 @@ export function StartAnalysisUpload() {
               type="button"
               onClick={handleAnalyze}
               disabled={!selectedFile || isAnalyzing}
-              className="mt-4 inline-flex items-center justify-center gap-2 rounded-md bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 inline-flex items-center justify-center gap-2 rounded-md bg-ink px-5 py-2.5 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isAnalyzing && <Spinner />}
               {isAnalyzing ? "Analyzing..." : "Analyze data"}

@@ -1,21 +1,117 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   color-scheme: light;
-  --background: #fafafa;
-  --foreground: #18181b;
+  --canvas: #fafafa;
+  --surface: #ffffff;
+  --raised: #f4f4f5;
+  --hairline: #e4e4e7;
+  --stroke: #d4d4d8;
+  --ink: #18181b;
+  --ink-secondary: #3f3f46;
+  --ink-muted: #71717a;
+  --ink-faint: #a1a1aa;
+  --on-ink: #ffffff;
+  --ink-hover: #27272a;
+  --signal: #059669;
+  --deep-teal: #0f766e;
+  --mint-arc: #5eead4;
+  --alert: #b91c1c;
+  --alert-text: #dc2626;
+  --alert-wash: #fef2f2;
+  --alert-stroke: #fecaca;
+  --warning: #92400e;
+  --warning-wash: #fffbeb;
+  --warning-stroke: #fde68a;
+  --overlay: rgb(24 24 27 / 0.5);
+  --background: var(--canvas);
+  --foreground: var(--ink);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-hairline: var(--hairline);
+  --color-stroke: var(--stroke);
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-on-ink: var(--on-ink);
+  --color-ink-hover: var(--ink-hover);
+  --color-signal: var(--signal);
+  --color-deep-teal: var(--deep-teal);
+  --color-mint-arc: var(--mint-arc);
+  --color-alert: var(--alert);
+  --color-overlay: var(--overlay);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+.dark {
+  color-scheme: dark;
+  --canvas: #09090b;
+  --surface: #18181b;
+  --raised: #27272a;
+  --hairline: #3f3f46;
+  --stroke: #52525b;
+  --ink: #fafafa;
+  --ink-secondary: #d4d4d8;
+  --ink-muted: #a1a1aa;
+  --ink-faint: #71717a;
+  --on-ink: #18181b;
+  --ink-hover: #e4e4e7;
+  --signal: #34d399;
+  --deep-teal: #0d9488;
+  --mint-arc: #5eead4;
+  --alert: #b91c1c;
+  --alert-text: #f87171;
+  --alert-wash: #450a0a;
+  --alert-stroke: #7f1d1d;
+  --warning: #fbbf24;
+  --warning-wash: #422006;
+  --warning-stroke: #854d0e;
+  --overlay: rgb(0 0 0 / 0.65);
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --color-red-50: #450a0a;
+  --color-red-200: #7f1d1d;
+  --color-red-500: #f87171;
+  --color-red-600: #f87171;
+  --color-red-700: #dc2626;
+  --color-red-800: #b91c1c;
+  --color-green-50: #022c22;
+  --color-green-100: #064e3b;
+  --color-green-200: #065f46;
+  --color-green-700: #6ee7b7;
+  --color-green-800: #a7f3d0;
+  --color-emerald-600: #34d399;
+  --color-amber-50: #422006;
+  --color-amber-100: #78350f;
+  --color-amber-200: #854d0e;
+  --color-amber-800: #fcd34d;
+  --color-amber-900: #fde68a;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+}
+
 html,
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--canvas);
+  color: var(--ink);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--raised);
+  color: var(--ink);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--ink);
 }

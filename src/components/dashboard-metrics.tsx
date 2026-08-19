@@ -19,9 +19,9 @@ export function TrendIndicator({
       : trend;
 
   const styles = {
-    up: "text-emerald-600",
+    up: "text-signal",
     down: "text-red-600",
-    flat: "text-zinc-500",
+    flat: "text-ink-muted",
   };
 
   const arrows = {

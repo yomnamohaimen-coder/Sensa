@@ -31,7 +31,7 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col px-6 py-10">
       <header className="mb-8">
-        <h1 className="break-words text-2xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="break-words text-2xl font-semibold tracking-tight text-ink">
           {welcomeMessage}
         </h1>
       </header>
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
         />
       ) : (
         <div className="mb-8">
-          <p className="text-base text-zinc-600">
+          <p className="text-base text-ink-secondary">
             No analysis yet — connect your site or upload a CSV to get started.
           </p>
         </div>

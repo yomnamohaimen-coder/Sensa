@@ -346,9 +346,9 @@ export function ListingPageHeatmap({
 
   const statusOverlay =
     isLoading || error || (!isLoading && !error && !hasEvents) ? (
-      <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 px-6">
+      <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface/70 px-6">
         {isLoading ? (
-          <p role="status" className="text-sm text-zinc-600">
+          <p role="status" className="text-sm text-ink-secondary">
             Loading heatmap…
           </p>
         ) : error ? (
@@ -356,7 +356,7 @@ export function ListingPageHeatmap({
             Could not load heatmap data. Please try again.
           </p>
         ) : (
-          <p role="status" className="text-center text-sm text-zinc-600">
+          <p role="status" className="text-center text-sm text-ink-secondary">
             Not enough click data yet
           </p>
         )}
@@ -366,7 +366,7 @@ export function ListingPageHeatmap({
   return (
     <figure className="m-0 block h-auto w-full min-w-0 leading-none" style={{ colorScheme: "light" }}>
       {usingSnapshot && snapshot ? (
-        <div className="relative block h-auto w-full overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 leading-none">
+        <div className="relative block h-auto w-full overflow-hidden rounded-lg border border-hairline bg-canvas leading-none">
           <img
             ref={imageRef}
             src={snapshot.image_url}
@@ -400,7 +400,7 @@ export function ListingPageHeatmap({
       ) : (
         <div
           ref={fitRef}
-          className="relative block h-auto w-full overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 leading-none"
+          className="relative block h-auto w-full overflow-hidden rounded-lg border border-hairline bg-canvas leading-none"
         >
           <div
             className="relative"

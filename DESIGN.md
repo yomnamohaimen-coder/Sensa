@@ -145,6 +145,21 @@ A cool neutral zinc scale carries almost all UI; teal/emerald and red appear onl
 - **Ink Muted** (#71717a): Helper text, flat trends, secondary copy.
 - **Ink Faint** (#a1a1aa): Non-text decoration only (icons, inactive chrome). Do not use for readable copy — prefer Ink Muted.
 
+### Dark appearance
+Appearance is **manual** (Settings → Light or Dark). Default is Light. Do not follow `prefers-color-scheme`.
+
+Dark is a composed night panel, not a mechanical invert: canvas sits below surface, surface lifts with raised wells, hairlines stay visible, and ink/paper swap roles.
+
+- **Canvas** (#09090b): App shell behind the sidebar.
+- **Surface** (#18181b): Cards, sidebar, dialogs.
+- **Raised** (#27272a): Active nav, wells, segmented tracks.
+- **Hairline** (#3f3f46) / **Stroke** (#52525b): Borders.
+- **Ink** (#fafafa) / **Ink Secondary** (#d4d4d8) / **Ink Muted** (#a1a1aa): Text. Muted uses the light-theme faint step so copy stays ≥4.5:1 on Surface.
+- **On Ink** (#18181b): Label on the inverted primary button (Paper fill).
+- **Signal Green** (#34d399), **Deep Teal** (#0d9488), **Mint Arc** (#5eead4), **Alert** text (#f87171): meaning colors only, lifted for contrast. Destructive button fill stays Alert Red (#b91c1c).
+
+Heatmap snapshots and the Harbor Homes wireframe stay light — they depict the customer’s page, not Sensa chrome.
+
 ### Named Rules
 **The Meaning-Only Color Rule.** Decorative color is banned. Green / teal / red appear only when they encode meaning (positive trend, conversion, danger/error). Otherwise stay in zinc.
 
@@ -241,7 +256,7 @@ Character: **refined and restrained**.
 ## Do's and Don'ts
 
 ### Do:
-- **Do** keep authenticated screens on Paper Mist with white Hairline cards.
+- **Do** keep authenticated screens on Paper Mist with white Hairline cards in Light, and on Canvas / Surface / Hairline tokens in Dark.
 - **Do** reserve Signal Green / Deep Teal / Mint Arc / Alert Red for semantic meaning only.
 - **Do** use one hero metric treatment (larger type, slightly stronger border) when a primary KPI leads the view.
 - **Do** prefer Geist Sans hierarchy already in use; keep page titles `text-2xl font-semibold tracking-tight`.

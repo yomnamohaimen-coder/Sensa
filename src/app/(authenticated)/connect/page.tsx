@@ -47,10 +47,10 @@ export default async function ConnectPage() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col px-6 py-10">
       <header className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
           Connect
         </h1>
-        <p className="mt-2 text-sm text-zinc-500">
+        <p className="mt-2 text-sm text-ink-muted">
           Connect your website to start collecting data automatically, instead of
           uploading files manually.
         </p>
@@ -59,8 +59,8 @@ export default async function ConnectPage() {
       {snippet ? (
         <ConnectSnippet snippet={snippet} />
       ) : (
-        <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-zinc-600">
+        <div className="rounded-lg border border-hairline bg-surface p-5 shadow-sm">
+          <p className="text-sm text-ink-secondary">
             Your tracking ID is not available yet. Refresh the page, or contact
             support if this persists.
           </p>
@@ -75,7 +75,7 @@ export default async function ConnectPage() {
         className={`mt-6 rounded-lg border px-4 py-4 text-sm ${
           isConnected
             ? "border-green-200 bg-green-50 text-green-800"
-            : "border-zinc-200 bg-white text-zinc-600 shadow-sm"
+            : "border-hairline bg-surface text-ink-secondary shadow-sm"
         }`}
       >
         {isConnected ? (

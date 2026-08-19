@@ -14,6 +14,7 @@
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.111.0",
     "next": "16.2.12",
+    "next-themes": "^0.4.6",
     "puppeteer": "^25.7.0",
     "react": "19.2.4",
     "react-clickmap": "^0.3.0",

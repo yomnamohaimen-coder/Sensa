@@ -48,22 +48,22 @@ export function SessionPlayer({ events, isLoading }: SessionPlayerProps) {
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-dashed border-zinc-200 bg-white px-6 py-10 text-center">
-        <p className="text-sm text-zinc-600">Loading recording…</p>
+      <div className="rounded-lg border border-dashed border-hairline bg-surface px-6 py-10 text-center">
+        <p className="text-sm text-ink-secondary">Loading recording…</p>
       </div>
     );
   }
 
   if (events.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-zinc-200 bg-white px-6 py-10 text-center">
-        <p className="text-sm text-zinc-600">No events to replay</p>
+      <div className="rounded-lg border border-dashed border-hairline bg-surface px-6 py-10 text-center">
+        <p className="text-sm text-ink-secondary">No events to replay</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
+    <div className="overflow-hidden rounded-lg border border-hairline bg-canvas">
       <div ref={containerRef} className="w-full" />
     </div>
   );

@@ -2,10 +2,10 @@ import type { FunnelStep } from "@/lib/analytics/calculate-report-metrics";
 import { EmptyChartPlaceholder } from "@/components/empty-states";
 
 /** Dark teal — first-stage (full) ring; matches emerald/teal accent family used in charts. */
-const RING_TRACK = "#0f766e"; // teal-700
+const RING_TRACK = "var(--deep-teal)";
 /** Lighter accent teal — completed (last-stage) arc. */
-const RING_FILL = "#5eead4"; // teal-300
-const RING_BG = "#e4e4e7"; // zinc-200 — underlay for contrast
+const RING_FILL = "var(--mint-arc)";
+const RING_BG = "var(--hairline)";
 
 const SIZE = 112;
 const STROKE = 12;
@@ -79,17 +79,17 @@ export function MiniConversionDonut({ steps }: { steps: FunnelStep[] }) {
           className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center"
           aria-hidden="true"
         >
-          <span className="text-lg font-semibold tabular-nums tracking-tight text-zinc-900">
+          <span className="text-lg font-semibold tabular-nums tracking-tight text-ink">
             {percent}%
           </span>
-          <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+          <span className="text-xs font-medium uppercase tracking-wide text-ink-muted">
             converted
           </span>
         </div>
       </div>
 
       <ul
-        className="flex w-full flex-col items-center gap-1.5 text-xs text-zinc-600"
+        className="flex w-full flex-col items-center gap-1.5 text-xs text-ink-secondary"
         aria-hidden="true"
       >
         <li className="flex max-w-full items-center gap-2">
@@ -99,7 +99,7 @@ export function MiniConversionDonut({ steps }: { steps: FunnelStep[] }) {
           />
           <span className="min-w-0 truncate">
             {first.step}{" "}
-            <span className="tabular-nums text-zinc-500">
+            <span className="tabular-nums text-ink-muted">
               ({first.count.toLocaleString()})
             </span>
           </span>
@@ -111,7 +111,7 @@ export function MiniConversionDonut({ steps }: { steps: FunnelStep[] }) {
           />
           <span className="min-w-0 truncate">
             {last.step}{" "}
-            <span className="tabular-nums text-zinc-500">
+            <span className="tabular-nums text-ink-muted">
               ({last.count.toLocaleString()})
             </span>
           </span>

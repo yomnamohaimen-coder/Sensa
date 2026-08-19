@@ -48,8 +48,8 @@ export function DeleteAccountForm({
   return (
     <>
       <div className="rounded-lg border border-red-200 bg-red-50/60 p-5 shadow-sm">
-        <h2 className="text-base font-semibold text-zinc-900">Delete account</h2>
-        <p className="mt-1 text-sm text-zinc-600">
+        <h2 className="text-base font-semibold text-ink">Delete account</h2>
+        <p className="mt-1 text-sm text-ink-secondary">
           Permanently remove your Sensa account, reports, tracking data, heatmaps,
           and session recordings. This cannot be undone.
         </p>
@@ -70,7 +70,7 @@ export function DeleteAccountForm({
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 px-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-overlay px-4"
           role="presentation"
           onClick={() => {
             if (!isDeleting) {
@@ -82,25 +82,25 @@ export function DeleteAccountForm({
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-account-title"
-            className="w-full max-w-md rounded-lg border border-red-200 bg-white p-5 shadow-lg"
+            className="w-full max-w-md rounded-lg border border-red-200 bg-surface p-5 shadow-lg"
             onClick={(event) => event.stopPropagation()}
           >
             <h3
               id="delete-account-title"
-              className="text-base font-semibold text-zinc-900"
+              className="text-base font-semibold text-ink"
             >
               Confirm account deletion
             </h3>
-            <p className="mt-2 text-sm text-zinc-600">
+            <p className="mt-2 text-sm text-ink-secondary">
               This will permanently delete your account and all associated data.
-              Type <span className="font-medium text-zinc-900">{confirmHint}</span>{" "}
+              Type <span className="font-medium text-ink">{confirmHint}</span>{" "}
               to confirm.
             </p>
 
             <form onSubmit={handleDelete} className="mt-5">
               <label
                 htmlFor="delete-account-confirmation"
-                className="mb-1.5 block text-sm font-medium text-zinc-700"
+                className="mb-1.5 block text-sm font-medium text-ink-secondary"
               >
                 Confirmation
               </label>
@@ -110,7 +110,7 @@ export function DeleteAccountForm({
                 autoComplete="off"
                 value={confirmation}
                 onChange={(event) => setConfirmation(event.target.value)}
-                className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                className="w-full rounded-md border border-stroke px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-red-500 focus:ring-1 focus:ring-red-500"
                 placeholder={confirmHint}
               />
 
@@ -121,7 +121,7 @@ export function DeleteAccountForm({
                   type="button"
                   disabled={isDeleting}
                   onClick={() => setOpen(false)}
-                  className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60"
+                  className="rounded-md border border-stroke bg-surface px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-canvas disabled:opacity-60"
                 >
                   Cancel
                 </button>

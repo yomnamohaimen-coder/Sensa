@@ -138,8 +138,8 @@ function navLinkClassName(isActive: boolean, collapsed: boolean) {
     "flex min-h-11 items-center rounded-md text-sm font-medium transition-colors",
     collapsed ? "justify-center px-2 py-2" : "gap-3 px-3 py-2",
     isActive
-      ? "bg-zinc-100 text-zinc-900"
-      : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
+      ? "bg-raised text-ink"
+      : "text-ink-secondary hover:bg-canvas hover:text-ink",
   ].join(" ");
 }
 
@@ -172,19 +172,19 @@ export function AppSidebar() {
 
   return (
     <aside
-      className={`flex shrink-0 flex-col overflow-hidden border-r border-zinc-200 bg-white transition-[width] duration-200 ease-out ${
+      className={`flex shrink-0 flex-col overflow-hidden border-r border-hairline bg-surface transition-[width] duration-200 ease-out ${
         collapsed ? "w-14" : "w-56"
       }`}
       aria-label="Main navigation"
     >
       <div
-        className={`flex shrink-0 items-center border-b border-zinc-200 ${
+        className={`flex shrink-0 items-center border-b border-hairline ${
           collapsed ? "justify-center px-2 py-4" : "justify-between gap-2 px-3 py-4"
         }`}
       >
         <Link
           href="/dashboard"
-          className={`font-semibold tracking-tight text-zinc-900 ${
+          className={`font-semibold tracking-tight text-ink ${
             collapsed ? "text-base" : "truncate text-lg"
           }`}
           title="Sensa"
@@ -199,7 +199,7 @@ export function AppSidebar() {
             aria-expanded={!collapsed}
             aria-controls="app-sidebar-nav"
             aria-label="Collapse sidebar"
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
           >
             <ChevronLeftIcon className="h-5 w-5" />
           </button>
@@ -214,7 +214,7 @@ export function AppSidebar() {
             aria-expanded={!collapsed}
             aria-controls="app-sidebar-nav"
             aria-label="Expand sidebar"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
           >
             <ChevronRightIcon className="h-5 w-5" />
           </button>
@@ -247,7 +247,7 @@ export function AppSidebar() {
       </nav>
 
       <div
-        className={`shrink-0 border-t border-zinc-200 py-3 ${
+        className={`shrink-0 border-t border-hairline py-3 ${
           collapsed ? "px-2" : "px-3"
         }`}
       >

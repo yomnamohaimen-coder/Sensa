@@ -71,10 +71,10 @@ export function ConnectSiteUrlForm({ initialSiteUrl }: ConnectSiteUrlFormProps) 
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm"
+      className="rounded-lg border border-hairline bg-surface p-5 shadow-sm"
     >
-      <h2 className="text-base font-semibold text-zinc-900">Your website</h2>
-      <p className="mt-1 text-sm text-zinc-500">
+      <h2 className="text-base font-semibold text-ink">Your website</h2>
+      <p className="mt-1 text-sm text-ink-muted">
         Add your website&apos;s main link here. Sensa uses it to visit your pages
         and capture what they look like — this is what makes the Heatmap and
         Session Recordings features work (e.g. http://localhost:5173 or
@@ -84,7 +84,7 @@ export function ConnectSiteUrlForm({ initialSiteUrl }: ConnectSiteUrlFormProps) 
       <div className="mt-5">
         <label
           htmlFor="site-url"
-          className="mb-1.5 block text-sm font-medium text-zinc-700"
+          className="mb-1.5 block text-sm font-medium text-ink-secondary"
         >
           Site URL
         </label>
@@ -97,7 +97,7 @@ export function ConnectSiteUrlForm({ initialSiteUrl }: ConnectSiteUrlFormProps) 
             setSiteUrl(event.target.value);
             setSaved(false);
           }}
-          className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
+          className="w-full rounded-md border border-stroke px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-ink-muted focus:ring-1 focus:ring-ink-muted"
         />
       </div>
 
@@ -107,7 +107,7 @@ export function ConnectSiteUrlForm({ initialSiteUrl }: ConnectSiteUrlFormProps) 
       <button
         type="submit"
         disabled={isSaving}
-        className="mt-5 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        className="mt-5 rounded-md bg-ink px-4 py-2 text-sm font-medium text-on-ink disabled:opacity-50"
       >
         {isSaving ? "Saving…" : "Save"}
       </button>

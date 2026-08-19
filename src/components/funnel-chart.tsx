@@ -1,7 +1,7 @@
 import type { FunnelStep } from "@/lib/analytics/calculate-report-metrics";
 import { EmptyChartPlaceholder } from "@/components/empty-states";
 
-const BAR_COLORS = ["bg-zinc-800", "bg-zinc-600", "bg-zinc-400"];
+const BAR_COLORS = ["bg-ink", "bg-ink-secondary", "bg-ink-faint"];
 
 export function FunnelChart({
   steps,
@@ -38,12 +38,12 @@ export function FunnelChart({
             >
               <span
                 className={
-                  compact ? "text-zinc-600" : "font-medium text-zinc-800"
+                  compact ? "text-ink-secondary" : "font-medium text-ink"
                 }
               >
                 {step.step}
               </span>
-              <span className="text-zinc-500">
+              <span className="text-ink-muted">
                 {compact
                   ? step.count.toLocaleString()
                   : `${step.count.toLocaleString()} sessions${
@@ -54,10 +54,10 @@ export function FunnelChart({
               </span>
             </div>
             <div
-              className={`rounded-full bg-zinc-100 ${compact ? "h-1.5" : "h-2"}`}
+              className={`rounded-full bg-raised ${compact ? "h-1.5" : "h-2"}`}
             >
               <div
-                className={`rounded-full ${BAR_COLORS[index] ?? "bg-zinc-400"} ${
+                className={`rounded-full ${BAR_COLORS[index] ?? "bg-ink-faint"} ${
                   compact ? "h-1.5" : "h-2"
                 }`}
                 style={{

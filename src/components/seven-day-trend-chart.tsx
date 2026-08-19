@@ -16,8 +16,8 @@ export type TrendPoint = {
   value: number;
 };
 
-const LINE_COLOR = "#059669"; // emerald-600
-const FILL_COLOR = "rgba(5, 150, 105, 0.12)";
+const LINE_COLOR = "var(--signal)";
+const FILL_COLOR = "color-mix(in srgb, var(--signal) 12%, transparent)";
 
 export function SevenDayTrendChart({
   data,
@@ -35,7 +35,7 @@ export function SevenDayTrendChart({
         {Array.from({ length: 7 }).map((_, index) => (
           <div
             key={index}
-            className="flex-1 animate-pulse rounded-sm bg-zinc-100"
+            className="flex-1 animate-pulse rounded-sm bg-raised"
             style={{ height: `${40 + ((index * 17) % 45)}%` }}
           />
         ))}
@@ -59,25 +59,26 @@ export function SevenDayTrendChart({
           margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
         >
           <CartesianGrid
-            stroke="#f4f4f5"
+            stroke="var(--raised)"
             strokeDasharray="3 3"
             vertical={false}
           />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 11, fill: "#a1a1aa" }}
+            tick={{ fontSize: 11, fill: "var(--ink-faint)" }}
             tickLine={false}
             axisLine={false}
             interval={0}
           />
           <YAxis hide domain={["dataMin - 4", "dataMax + 4"]} />
           <Tooltip
-            cursor={{ stroke: "#d4d4d8", strokeWidth: 1 }}
+            cursor={{ stroke: "var(--stroke)", strokeWidth: 1 }}
             contentStyle={{
-              border: "1px solid #e4e4e7",
+              background: "var(--surface)",
+              border: "1px solid var(--hairline)",
               borderRadius: "6px",
               fontSize: "12px",
-              color: "#18181b",
+              color: "var(--ink)",
             }}
             formatter={(value) => [`${value}`, "Value"]}
             labelFormatter={(label) => String(label)}

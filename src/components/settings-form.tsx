@@ -55,17 +55,17 @@ export function SettingsForm({ initialProductName }: SettingsFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm"
+      className="rounded-lg border border-hairline bg-surface p-5 shadow-sm"
     >
-      <h2 className="text-base font-semibold text-zinc-900">Product</h2>
-      <p className="mt-1 text-sm text-zinc-500">
+      <h2 className="text-base font-semibold text-ink">Product</h2>
+      <p className="mt-1 text-sm text-ink-muted">
         This name appears in your dashboard welcome message.
       </p>
 
       <div className="mt-5">
         <label
           htmlFor="product-name"
-          className="mb-1.5 block text-sm font-medium text-zinc-700"
+          className="mb-1.5 block text-sm font-medium text-ink-secondary"
         >
           Product name
         </label>
@@ -77,7 +77,7 @@ export function SettingsForm({ initialProductName }: SettingsFormProps) {
             setProductName(event.target.value);
             setSaved(false);
           }}
-          className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
+          className="w-full rounded-md border border-stroke px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-ink-muted focus:ring-1 focus:ring-ink-muted"
           placeholder="Your product or company name"
         />
       </div>
@@ -91,7 +91,7 @@ export function SettingsForm({ initialProductName }: SettingsFormProps) {
         <button
           type="submit"
           disabled={isSaving}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSaving ? "Saving…" : "Save"}
         </button>

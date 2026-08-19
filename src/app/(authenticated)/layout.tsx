@@ -30,7 +30,7 @@ export default async function AuthenticatedLayout({
   }
 
   return (
-    <div className="flex bg-zinc-50">
+    <div className="flex bg-canvas">
       <AppSidebar />
       <main className="min-w-0 flex-1">{children}</main>
     </div>

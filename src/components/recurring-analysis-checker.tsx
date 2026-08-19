@@ -64,7 +64,7 @@ export function RecurringAnalysisChecker() {
 
   return (
     <div
-      className="mb-6 rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-600 shadow-sm"
+      className="mb-6 rounded-lg border border-hairline bg-surface px-4 py-3 text-sm text-ink-secondary shadow-sm"
       role="status"
       aria-live="polite"
     >

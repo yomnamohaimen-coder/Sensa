@@ -21,8 +21,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-      <h3 className="text-base font-semibold text-zinc-900">{title}</h3>
+    <section className="rounded-lg border border-hairline bg-surface p-5 shadow-sm">
+      <h3 className="text-base font-semibold text-ink">{title}</h3>
       <div className="mt-4">{children}</div>
     </section>
   );
@@ -55,7 +55,7 @@ function MetricValue({
   invertColors?: boolean;
 }) {
   return (
-    <dd className="mt-1 text-lg font-medium text-zinc-900">
+    <dd className="mt-1 text-lg font-medium text-ink">
       <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
         {display}
         {warning ? <MetricWarning label={warning} /> : null}
@@ -119,10 +119,10 @@ export function ReportView({
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h2 className="min-w-0 break-words text-lg font-semibold text-zinc-900">
+        <h2 className="min-w-0 break-words text-lg font-semibold text-ink">
           {report.label}
         </h2>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-ink-muted">
           {contextLabel ? `${contextLabel} · ${report.date}` : report.date}
         </p>
       </div>
@@ -130,7 +130,7 @@ export function ReportView({
       <Section title="AI insights">
         {report.aiInsights ? (
           <div className="flex flex-col gap-4 text-sm">
-            <p className="max-w-prose leading-6 text-zinc-700">
+            <p className="max-w-prose leading-6 text-ink-secondary">
               {report.aiInsights.summary}
             </p>
             {report.aiInsights.anomaly && (
@@ -139,8 +139,8 @@ export function ReportView({
                 {report.aiInsights.anomaly}
               </div>
             )}
-            <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-zinc-700">
-              <span className="font-medium text-zinc-900">Recommendation:</span>{" "}
+            <div className="rounded-md border border-hairline bg-canvas px-3 py-2 text-ink-secondary">
+              <span className="font-medium text-ink">Recommendation:</span>{" "}
               {report.aiInsights.recommendation}
             </div>
           </div>
@@ -161,7 +161,7 @@ export function ReportView({
         {metrics ? (
           <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="min-w-0">
-              <dt className="text-xs text-zinc-500">Sessions</dt>
+              <dt className="text-xs text-ink-muted">Sessions</dt>
               <MetricValue
                 display={metrics.userBehavior.sessions.toLocaleString()}
                 warning={sessionsWarning}
@@ -176,9 +176,9 @@ export function ReportView({
               />
             </div>
             <div className="min-w-0">
-              <dt className="text-xs text-zinc-500">
+              <dt className="text-xs text-ink-muted">
                 Unique users
-                <span className="mt-0.5 block font-normal text-zinc-500">
+                <span className="mt-0.5 block font-normal text-ink-muted">
                   (by session)
                 </span>
               </dt>
@@ -196,7 +196,7 @@ export function ReportView({
               />
             </div>
             <div className="min-w-0">
-              <dt className="text-xs text-zinc-500">Avg. session duration</dt>
+              <dt className="text-xs text-ink-muted">Avg. session duration</dt>
               <MetricValue
                 display={metrics.userBehavior.avgSessionDuration}
                 warning={durationWarning}
@@ -221,7 +221,7 @@ export function ReportView({
         {metrics ? (
           <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="min-w-0">
-              <dt className="text-xs text-zinc-500">Avg. time on page</dt>
+              <dt className="text-xs text-ink-muted">Avg. time on page</dt>
               <MetricValue
                 display={metrics.engagement.avgTimeOnPage}
                 warning={timeOnPageWarning}
@@ -236,7 +236,7 @@ export function ReportView({
               />
             </div>
             <div className="min-w-0">
-              <dt className="text-xs text-zinc-500">Bounce rate</dt>
+              <dt className="text-xs text-ink-muted">Bounce rate</dt>
               <MetricValue
                 display={metrics.engagement.bounceRate}
                 warning={bounceWarning}
@@ -252,7 +252,7 @@ export function ReportView({
               />
             </div>
             <div className="min-w-0">
-              <dt className="text-xs text-zinc-500">Pages per session</dt>
+              <dt className="text-xs text-ink-muted">Pages per session</dt>
               <MetricValue
                 display={metrics.engagement.pagesPerSession}
                 warning={pagesWarning}

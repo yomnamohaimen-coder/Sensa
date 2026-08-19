@@ -68,10 +68,10 @@ export function ReportsPageContent({
     <div className="flex min-h-full flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden">
       <header className="grid shrink-0 grid-cols-1 gap-4 px-6 pt-10 pb-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
         <div className="min-w-0 sm:col-start-1 sm:row-start-1">
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">
             Reports
           </h1>
-          <p className="mt-2 max-w-prose text-sm text-zinc-500">
+          <p className="mt-2 max-w-prose text-sm text-ink-muted">
             View analysis results and browse past reports
           </p>
         </div>
@@ -81,13 +81,13 @@ export function ReportsPageContent({
       <div className="flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[18rem_minmax(0,1fr)] lg:overflow-hidden">
         <aside
           aria-label="Past reports"
-          className="flex min-h-0 flex-col border-zinc-200 px-6 pb-6 lg:border-r lg:px-5 lg:pb-6"
+          className="flex min-h-0 flex-col border-hairline px-6 pb-6 lg:border-r lg:px-5 lg:pb-6"
         >
           <div>
-            <h2 className="text-base font-semibold text-zinc-900">
+            <h2 className="text-base font-semibold text-ink">
               Past reports
             </h2>
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-ink-muted">
               Filter by date and open any analysis
             </p>
           </div>
@@ -96,7 +96,7 @@ export function ReportsPageContent({
             <div className="min-w-0">
               <label
                 htmlFor="start-date"
-                className="mb-1.5 block text-xs font-medium text-zinc-600"
+                className="mb-1.5 block text-xs font-medium text-ink-secondary"
               >
                 From
               </label>
@@ -110,13 +110,13 @@ export function ReportsPageContent({
                 aria-describedby={
                   dateRangeInvalid ? "report-date-range-error" : undefined
                 }
-                className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
+                className="w-full rounded-md border border-stroke px-3 py-2 text-sm text-ink outline-none focus:border-ink-muted focus:ring-1 focus:ring-ink-muted"
               />
             </div>
             <div className="min-w-0">
               <label
                 htmlFor="end-date"
-                className="mb-1.5 block text-xs font-medium text-zinc-600"
+                className="mb-1.5 block text-xs font-medium text-ink-secondary"
               >
                 To
               </label>
@@ -130,7 +130,7 @@ export function ReportsPageContent({
                 aria-describedby={
                   dateRangeInvalid ? "report-date-range-error" : undefined
                 }
-                className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
+                className="w-full rounded-md border border-stroke px-3 py-2 text-sm text-ink outline-none focus:border-ink-muted focus:ring-1 focus:ring-ink-muted"
               />
             </div>
 
@@ -145,7 +145,7 @@ export function ReportsPageContent({
             ) : null}
           </div>
 
-          <ul className="mt-4 max-h-72 divide-y divide-zinc-200 overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-sm lg:max-h-none lg:min-h-0 lg:flex-1">
+          <ul className="mt-4 max-h-72 divide-y divide-hairline overflow-y-auto rounded-lg border border-hairline bg-surface shadow-sm lg:max-h-none lg:min-h-0 lg:flex-1">
             {filteredReports.length > 0 ? (
               filteredReports.map((report) => {
                 const isSelected = report.id === selectedReportId;
@@ -160,13 +160,13 @@ export function ReportsPageContent({
                       onClick={() => handleSelectReport(report.id)}
                       aria-current={isSelected ? "true" : undefined}
                       className={`flex w-full min-h-11 min-w-0 flex-col items-start gap-0.5 px-4 py-3 text-left transition-colors ${
-                        isSelected ? "bg-zinc-100" : "hover:bg-zinc-50"
+                        isSelected ? "bg-raised" : "hover:bg-canvas"
                       }`}
                     >
-                      <span className="w-full min-w-0 truncate text-sm font-medium text-zinc-900">
+                      <span className="w-full min-w-0 truncate text-sm font-medium text-ink">
                         {report.label}
                       </span>
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-xs text-ink-muted">
                         {report.date}
                       </span>
                     </button>
@@ -174,7 +174,7 @@ export function ReportsPageContent({
                 );
               })
             ) : (
-              <li className="px-4 py-8 text-center text-sm text-zinc-500">
+              <li className="px-4 py-8 text-center text-sm text-ink-muted">
                 {reports.length === 0
                   ? "No reports yet."
                   : dateRangeInvalid
@@ -187,7 +187,7 @@ export function ReportsPageContent({
 
         <section
           aria-label="Selected report"
-          className="min-w-0 border-t border-zinc-200 px-6 pt-8 pb-10 lg:overflow-y-auto lg:border-t-0 lg:px-8 lg:pt-0 lg:pb-10"
+          className="min-w-0 border-t border-hairline px-6 pt-8 pb-10 lg:overflow-y-auto lg:border-t-0 lg:px-8 lg:pt-0 lg:pb-10"
         >
           {selectedReport ? (
             <ReportView
@@ -196,8 +196,8 @@ export function ReportsPageContent({
               contextLabel={isMostRecent ? "Most recent" : undefined}
             />
           ) : (
-            <div className="rounded-lg border border-dashed border-zinc-200 bg-white px-6 py-10 text-center">
-              <p className="text-sm text-zinc-600">
+            <div className="rounded-lg border border-dashed border-hairline bg-surface px-6 py-10 text-center">
+              <p className="text-sm text-ink-secondary">
                 No reports yet. Upload a CSV to generate your first analysis.
               </p>
             </div>

@@ -26,7 +26,7 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 px-4 py-12">
+    <div className="flex flex-1 items-center justify-center bg-canvas px-4 py-12">
       <OnboardingForm />
     </div>
   );

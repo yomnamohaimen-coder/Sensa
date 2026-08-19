@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 
 const inputClassName =
-  "w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500";
+  "w-full rounded-md border border-stroke px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-ink-muted focus:ring-1 focus:ring-ink-muted";
 
 function mapPasswordUpdateError(message: string, code?: string): string {
   const lower = message.toLowerCase();
@@ -104,11 +104,11 @@ export function ChangePasswordForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm"
+      className="rounded-lg border border-hairline bg-surface p-5 shadow-sm"
       noValidate
     >
-      <h2 className="text-base font-semibold text-zinc-900">Change password</h2>
-      <p className="mt-1 text-sm text-zinc-500">
+      <h2 className="text-base font-semibold text-ink">Change password</h2>
+      <p className="mt-1 text-sm text-ink-muted">
         Update the password you use to sign in to Sensa.
       </p>
 
@@ -116,7 +116,7 @@ export function ChangePasswordForm() {
         <div>
           <label
             htmlFor="current-password"
-            className="mb-1.5 block text-sm font-medium text-zinc-700"
+            className="mb-1.5 block text-sm font-medium text-ink-secondary"
           >
             Current password
           </label>
@@ -137,7 +137,7 @@ export function ChangePasswordForm() {
         <div>
           <label
             htmlFor="new-password"
-            className="mb-1.5 block text-sm font-medium text-zinc-700"
+            className="mb-1.5 block text-sm font-medium text-ink-secondary"
           >
             New password
           </label>
@@ -158,7 +158,7 @@ export function ChangePasswordForm() {
         <div>
           <label
             htmlFor="confirm-password"
-            className="mb-1.5 block text-sm font-medium text-zinc-700"
+            className="mb-1.5 block text-sm font-medium text-ink-secondary"
           >
             Confirm new password
           </label>
@@ -186,7 +186,7 @@ export function ChangePasswordForm() {
         <button
           type="submit"
           disabled={isSaving}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSaving ? "Updating…" : "Update password"}
         </button>
