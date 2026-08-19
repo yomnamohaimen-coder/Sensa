@@ -32,8 +32,7 @@ export function AppearanceForm() {
 
   return (
     <div className="rounded-lg border border-hairline bg-surface p-5 shadow-sm">
-      <h2 className="text-base font-semibold text-ink">Appearance</h2>
-      <p className="mt-1 max-w-prose text-sm text-ink-muted">
+      <p className="max-w-prose text-sm text-ink-muted">
         Choose how Sensa looks on this device. This does not follow your system
         setting.
       </p>

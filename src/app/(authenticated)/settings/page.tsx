@@ -35,60 +35,84 @@ export default async function SettingsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col px-6 py-10">
-      <section>
-        <h2 className="text-lg font-semibold tracking-tight text-ink">
-          Appearance
-        </h2>
-        <p className="mt-1 text-sm text-ink-muted">
-          Light or dark chrome for Sensa. Snapshots of your site stay as captured.
+      <header className="mb-8">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
+          Settings
+        </h1>
+        <p className="mt-2 max-w-prose text-sm text-ink-muted">
+          How Sensa looks, how you sign in, and how analysis runs.
         </p>
-        <div className="mt-4">
-          <AppearanceForm />
-        </div>
-      </section>
+      </header>
 
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold tracking-tight text-ink">
-          Account
-        </h2>
-        <p className="mt-1 text-sm text-ink-muted">
-          How you appear in Sensa and how you sign in.
-        </p>
-        <div className="mt-4 flex flex-col gap-4">
-          <SettingsForm initialProductName={productName} />
-          <ChangePasswordForm />
-        </div>
-      </section>
+      <div className="flex flex-col gap-10">
+        <section aria-labelledby="settings-appearance-heading">
+          <h2
+            id="settings-appearance-heading"
+            className="text-lg font-semibold tracking-tight text-ink"
+          >
+            Appearance
+          </h2>
+          <p className="mt-1 max-w-prose text-sm text-ink-muted">
+            Light or dark chrome for Sensa. Snapshots of your site stay as
+            captured.
+          </p>
+          <div className="mt-4">
+            <AppearanceForm />
+          </div>
+        </section>
 
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold tracking-tight text-ink">
-          Analysis
-        </h2>
-        <p className="mt-1 text-sm text-ink-muted">
-          How often Sensa turns new activity into a report.
-        </p>
-        <div className="mt-4">
-          <AnalysisIntervalForm
-            initialIntervalDays={intervalDays}
-            initialManualOnly={manualOnly}
-          />
-        </div>
-      </section>
+        <section aria-labelledby="settings-account-heading">
+          <h2
+            id="settings-account-heading"
+            className="text-lg font-semibold tracking-tight text-ink"
+          >
+            Account
+          </h2>
+          <p className="mt-1 max-w-prose text-sm text-ink-muted">
+            How you appear in Sensa and how you sign in.
+          </p>
+          <div className="mt-4 flex flex-col gap-4">
+            <SettingsForm initialProductName={productName} />
+            <ChangePasswordForm />
+          </div>
+        </section>
 
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold tracking-tight text-ink">
-          Danger zone
-        </h2>
-        <p className="mt-1 text-sm text-ink-muted">
-          Irreversible actions for this account.
-        </p>
-        <div className="mt-4">
-          <DeleteAccountForm
-            email={user?.email ?? ""}
-            productName={productName}
-          />
-        </div>
-      </section>
+        <section aria-labelledby="settings-analysis-heading">
+          <h2
+            id="settings-analysis-heading"
+            className="text-lg font-semibold tracking-tight text-ink"
+          >
+            Analysis
+          </h2>
+          <p className="mt-1 max-w-prose text-sm text-ink-muted">
+            How often Sensa turns new activity into a report.
+          </p>
+          <div className="mt-4">
+            <AnalysisIntervalForm
+              initialIntervalDays={intervalDays}
+              initialManualOnly={manualOnly}
+            />
+          </div>
+        </section>
+
+        <section aria-labelledby="settings-danger-heading">
+          <h2
+            id="settings-danger-heading"
+            className="text-lg font-semibold tracking-tight text-ink"
+          >
+            Danger zone
+          </h2>
+          <p className="mt-1 max-w-prose text-sm text-ink-muted">
+            Irreversible actions for this account.
+          </p>
+          <div className="mt-4">
+            <DeleteAccountForm
+              email={user?.email ?? ""}
+              productName={productName}
+            />
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

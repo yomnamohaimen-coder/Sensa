@@ -139,7 +139,7 @@ export function ChangePasswordForm() {
       className="min-w-0 rounded-lg border border-hairline bg-surface p-5 shadow-sm"
       noValidate
     >
-      <h2 className="text-base font-semibold text-ink">Change password</h2>
+      <h3 className="text-base font-semibold text-ink">Change password</h3>
       <p className="mt-1 max-w-prose text-sm text-ink-muted">
         Update the password you use to sign in to Sensa.
       </p>
