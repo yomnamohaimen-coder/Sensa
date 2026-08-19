@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+
+const PRODUCT_NAME_MAX_LENGTH = 120;
+
+const primaryButtonClassName =
+  "rounded-md bg-ink px-4 py-2 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted disabled:cursor-not-allowed disabled:opacity-60";
 
 type SettingsFormProps = {
   initialProductName: string;
@@ -10,6 +15,8 @@ type SettingsFormProps = {
 
 export function SettingsForm({ initialProductName }: SettingsFormProps) {
   const router = useRouter();
+  const errorId = useId();
+  const statusId = useId();
   const [productName, setProductName] = useState(initialProductName);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -41,12 +48,17 @@ export function SettingsForm({ initialProductName }: SettingsFormProps) {
         .eq("id", user.id);
 
       if (saveError) {
-        setError(saveError.message);
+        setError(
+          saveError.message ||
+            "Could not save product name. Please try again.",
+        );
         return;
       }
 
       setSaved(true);
       router.refresh();
+    } catch {
+      setError("Could not save product name. Check your connection and try again.");
     } finally {
       setIsSaving(false);
     }
@@ -55,14 +67,14 @@ export function SettingsForm({ initialProductName }: SettingsFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-hairline bg-surface p-5 shadow-sm"
+      className="min-w-0 rounded-lg border border-hairline bg-surface p-5 shadow-sm"
     >
       <h2 className="text-base font-semibold text-ink">Product</h2>
-      <p className="mt-1 text-sm text-ink-muted">
+      <p className="mt-1 max-w-prose text-sm text-ink-muted">
         This name appears in your dashboard welcome message.
       </p>
 
-      <div className="mt-5">
+      <div className="mt-5 min-w-0">
         <label
           htmlFor="product-name"
           className="mb-1.5 block text-sm font-medium text-ink-secondary"
@@ -72,26 +84,41 @@ export function SettingsForm({ initialProductName }: SettingsFormProps) {
         <input
           id="product-name"
           type="text"
+          maxLength={PRODUCT_NAME_MAX_LENGTH}
+          autoComplete="organization"
           value={productName}
           onChange={(event) => {
             setProductName(event.target.value);
             setSaved(false);
+            setError(null);
           }}
-          className="w-full rounded-md border border-stroke px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-ink-muted focus:ring-1 focus:ring-ink-muted"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
+          className="w-full min-w-0 rounded-md border border-stroke px-3 py-2 text-base text-ink outline-none transition-colors placeholder:text-ink-muted focus:border-ink-muted focus:ring-1 focus:ring-ink-muted sm:text-sm"
           placeholder="Your product or company name"
         />
       </div>
 
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-      {saved && !error && (
-        <p className="mt-3 text-sm text-green-700">Saved</p>
-      )}
+      {error ? (
+        <p
+          id={errorId}
+          role="alert"
+          className="mt-3 break-words text-sm text-red-600"
+        >
+          {error}
+        </p>
+      ) : null}
+      {saved && !error ? (
+        <p id={statusId} role="status" className="mt-3 text-sm text-green-700">
+          Saved
+        </p>
+      ) : null}
 
       <div className="mt-5">
         <button
           type="submit"
           disabled={isSaving}
-          className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover disabled:cursor-not-allowed disabled:opacity-60"
+          className={primaryButtonClassName}
         >
           {isSaving ? "Saving…" : "Save"}
         </button>

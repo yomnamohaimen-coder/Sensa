@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { AnalysisIntervalForm } from "@/components/analysis-interval-form";
 import { AppearanceForm } from "@/components/appearance-form";
@@ -5,6 +6,10 @@ import { ChangePasswordForm } from "@/components/change-password-form";
 import { DeleteAccountForm } from "@/components/delete-account-form";
 import { SettingsForm } from "@/components/settings-form";
 import { createClient } from "@/utils/supabase/server";
+
+export const metadata: Metadata = {
+  title: "Settings · Sensa",
+};
 
 export default async function SettingsPage() {
   const cookieStore = await cookies();

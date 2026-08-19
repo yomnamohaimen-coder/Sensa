@@ -1,11 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 
 const inputClassName =
-  "w-full rounded-md border border-stroke px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-ink-faint focus:border-ink-muted focus:ring-1 focus:ring-ink-muted";
+  "w-full min-w-0 rounded-md border border-stroke px-3 py-2 text-base text-ink outline-none transition-colors focus:border-ink-muted focus:ring-1 focus:ring-ink-muted sm:text-sm";
+
+const primaryButtonClassName =
+  "rounded-md bg-ink px-4 py-2 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted disabled:cursor-not-allowed disabled:opacity-60";
+
+type PasswordField = "current" | "new" | "confirm";
 
 function mapPasswordUpdateError(message: string, code?: string): string {
   const lower = message.toLowerCase();
@@ -18,7 +23,11 @@ function mapPasswordUpdateError(message: string, code?: string): string {
   }
 
   if (code === "weak_password" || lower.includes("password")) {
-    if (lower.includes("least") || lower.includes("weak") || code === "weak_password") {
+    if (
+      lower.includes("least") ||
+      lower.includes("weak") ||
+      code === "weak_password"
+    ) {
       return "New password is too weak. Use at least 6 characters.";
     }
   }
@@ -28,35 +37,53 @@ function mapPasswordUpdateError(message: string, code?: string): string {
 
 export function ChangePasswordForm() {
   const router = useRouter();
+  const errorId = useId();
+  const statusId = useId();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [invalidFields, setInvalidFields] = useState<
+    Partial<Record<PasswordField, boolean>>
+  >({});
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  function describedBy(field: PasswordField) {
+    return error && invalidFields[field] ? errorId : undefined;
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     setSaved(false);
+    setInvalidFields({});
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       setError("Please fill in all password fields.");
+      setInvalidFields({
+        current: !currentPassword,
+        new: !newPassword,
+        confirm: !confirmPassword,
+      });
       return;
     }
 
     if (newPassword !== confirmPassword) {
       setError("New password and confirmation do not match.");
+      setInvalidFields({ confirm: true });
       return;
     }
 
     if (newPassword.length < 6) {
       setError("New password must be at least 6 characters.");
+      setInvalidFields({ new: true });
       return;
     }
 
     if (newPassword === currentPassword) {
       setError("New password must be different from your current password.");
+      setInvalidFields({ new: true });
       return;
     }
 
@@ -80,6 +107,7 @@ export function ChangePasswordForm() {
 
       if (verifyError) {
         setError(mapPasswordUpdateError(verifyError.message, verifyError.code));
+        setInvalidFields({ current: true });
         return;
       }
 
@@ -89,6 +117,7 @@ export function ChangePasswordForm() {
 
       if (updateError) {
         setError(mapPasswordUpdateError(updateError.message, updateError.code));
+        setInvalidFields({ new: true });
         return;
       }
 
@@ -96,6 +125,9 @@ export function ChangePasswordForm() {
       setNewPassword("");
       setConfirmPassword("");
       setSaved(true);
+    } catch {
+      setError("Could not update password. Check your connection and try again.");
+      setInvalidFields({ current: true });
     } finally {
       setIsSaving(false);
     }
@@ -104,16 +136,16 @@ export function ChangePasswordForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-hairline bg-surface p-5 shadow-sm"
+      className="min-w-0 rounded-lg border border-hairline bg-surface p-5 shadow-sm"
       noValidate
     >
       <h2 className="text-base font-semibold text-ink">Change password</h2>
-      <p className="mt-1 text-sm text-ink-muted">
+      <p className="mt-1 max-w-prose text-sm text-ink-muted">
         Update the password you use to sign in to Sensa.
       </p>
 
       <div className="mt-5 space-y-4">
-        <div>
+        <div className="min-w-0">
           <label
             htmlFor="current-password"
             className="mb-1.5 block text-sm font-medium text-ink-secondary"
@@ -124,17 +156,21 @@ export function ChangePasswordForm() {
             id="current-password"
             type="password"
             autoComplete="current-password"
+            required
             value={currentPassword}
             onChange={(event) => {
               setCurrentPassword(event.target.value);
               setSaved(false);
+              setError(null);
+              setInvalidFields((fields) => ({ ...fields, current: false }));
             }}
+            aria-invalid={invalidFields.current || undefined}
+            aria-describedby={describedBy("current")}
             className={inputClassName}
-            placeholder="••••••••"
           />
         </div>
 
-        <div>
+        <div className="min-w-0">
           <label
             htmlFor="new-password"
             className="mb-1.5 block text-sm font-medium text-ink-secondary"
@@ -145,17 +181,22 @@ export function ChangePasswordForm() {
             id="new-password"
             type="password"
             autoComplete="new-password"
+            required
+            minLength={6}
             value={newPassword}
             onChange={(event) => {
               setNewPassword(event.target.value);
               setSaved(false);
+              setError(null);
+              setInvalidFields((fields) => ({ ...fields, new: false }));
             }}
+            aria-invalid={invalidFields.new || undefined}
+            aria-describedby={describedBy("new")}
             className={inputClassName}
-            placeholder="••••••••"
           />
         </div>
 
-        <div>
+        <div className="min-w-0">
           <label
             htmlFor="confirm-password"
             className="mb-1.5 block text-sm font-medium text-ink-secondary"
@@ -166,27 +207,42 @@ export function ChangePasswordForm() {
             id="confirm-password"
             type="password"
             autoComplete="new-password"
+            required
+            minLength={6}
             value={confirmPassword}
             onChange={(event) => {
               setConfirmPassword(event.target.value);
               setSaved(false);
+              setError(null);
+              setInvalidFields((fields) => ({ ...fields, confirm: false }));
             }}
+            aria-invalid={invalidFields.confirm || undefined}
+            aria-describedby={describedBy("confirm")}
             className={inputClassName}
-            placeholder="••••••••"
           />
         </div>
       </div>
 
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-      {saved && !error && (
-        <p className="mt-3 text-sm text-green-700">Password updated</p>
-      )}
+      {error ? (
+        <p
+          id={errorId}
+          role="alert"
+          className="mt-3 break-words text-sm text-red-600"
+        >
+          {error}
+        </p>
+      ) : null}
+      {saved && !error ? (
+        <p id={statusId} role="status" className="mt-3 text-sm text-green-700">
+          Password updated
+        </p>
+      ) : null}
 
       <div className="mt-5">
         <button
           type="submit"
           disabled={isSaving}
-          className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover disabled:cursor-not-allowed disabled:opacity-60"
+          className={primaryButtonClassName}
         >
           {isSaving ? "Updating…" : "Update password"}
         </button>
