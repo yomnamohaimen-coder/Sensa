@@ -32,7 +32,7 @@ export default async function AuthenticatedLayout({
   return (
     <div className="flex h-screen min-h-screen bg-zinc-50">
       <AppSidebar />
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</main>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SessionPlayer } from "@/components/session-recordings/session-player";
 import { getOrCreateSessionSummary } from "@/lib/session-recordings/build-session-summary";
 import { getSessionRrwebEvents } from "@/lib/session-recordings/get-session-events";
@@ -38,6 +38,7 @@ export function SessionRecordingsPageContent({
 }: {
   sessions: SessionRecordingSummary[];
 }) {
+  const selectedItemRef = useRef<HTMLLIElement>(null);
   const [selectedSessionId, setSelectedSessionId] = useState(
     sessions[0]?.sessionId ?? "",
   );
@@ -53,7 +54,15 @@ export function SessionRecordingsPageContent({
     (session) => session.sessionId === selectedSessionId,
   );
 
+  const dateRangeInvalid = Boolean(
+    startDate && endDate && endDate < startDate,
+  );
+
   const filteredSessions = useMemo(() => {
+    if (dateRangeInvalid) {
+      return [];
+    }
+
     const pageNeedle = pageQuery.trim().toLowerCase();
 
     return sessions.filter((session) => {
@@ -74,7 +83,7 @@ export function SessionRecordingsPageContent({
 
       return true;
     });
-  }, [sessions, startDate, endDate, pageQuery]);
+  }, [sessions, startDate, endDate, pageQuery, dateRangeInvalid]);
 
   const hasActiveFilters = Boolean(startDate || endDate || pageQuery.trim());
 
@@ -132,157 +141,211 @@ export function SessionRecordingsPageContent({
     };
   }, [selectedSessionId]);
 
+  useEffect(() => {
+    selectedItemRef.current?.scrollIntoView({
+      block: "nearest",
+      behavior: "smooth",
+    });
+  }, [selectedSessionId]);
+
+  const isMostRecent = sessions[0]?.sessionId === selected?.sessionId;
+
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col px-6 py-10">
-      <header className="mb-8">
+    <div className="flex min-h-full flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden">
+      <header className="shrink-0 px-6 pt-10 pb-6">
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
           Session Recordings
         </h1>
-        <p className="mt-2 text-sm text-zinc-500">
+        <p className="mt-2 max-w-prose text-sm text-zinc-500">
           Watch real user sessions
         </p>
       </header>
 
-      <div className="mb-12">
-        {selected ? (
-          <>
-            <h2 className="mb-4 text-lg font-semibold text-zinc-900">
-              Session — {formatSessionTime(selected.startedAt)}
+      <div className="flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[18rem_minmax(0,1fr)] lg:overflow-hidden">
+        <aside
+          aria-label="Recording history"
+          className="flex min-h-0 flex-col border-zinc-200 px-6 pb-6 lg:border-r lg:px-5 lg:pb-6"
+        >
+          <div>
+            <h2 className="text-base font-semibold text-zinc-900">
+              Recordings
             </h2>
-            <SessionPlayer events={events} isLoading={isLoadingEvents} />
-            <div className="mt-4 rounded-md border border-zinc-200 bg-zinc-50 px-5 py-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
-                Session summary
-              </p>
-              {isLoadingSummary ? (
-                <p className="mt-2 text-sm text-zinc-600">
-                  Writing a summary…
-                </p>
-              ) : (
-                <p className="mt-2 text-sm leading-6 text-zinc-700">
-                  {aiSummary}
-                </p>
-              )}
+            <p className="mt-1 text-sm text-zinc-500">
+              Filter by date or page and open a session
+            </p>
+          </div>
+
+          <div className="mt-4 flex flex-col gap-3">
+            <div className="min-w-0">
+              <label
+                htmlFor="session-start-date"
+                className="mb-1.5 block text-xs font-medium text-zinc-600"
+              >
+                From
+              </label>
+              <input
+                id="session-start-date"
+                type="date"
+                value={startDate}
+                max={endDate || undefined}
+                onChange={(event) => setStartDate(event.target.value)}
+                aria-invalid={dateRangeInvalid}
+                aria-describedby={
+                  dateRangeInvalid ? "session-date-range-error" : undefined
+                }
+                className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
+              />
             </div>
-          </>
-        ) : (
-          <div className="rounded-lg border border-dashed border-zinc-200 bg-white px-6 py-10 text-center">
-            <p className="text-sm text-zinc-600">No recordings yet</p>
-          </div>
-        )}
-      </div>
+            <div className="min-w-0">
+              <label
+                htmlFor="session-end-date"
+                className="mb-1.5 block text-xs font-medium text-zinc-600"
+              >
+                To
+              </label>
+              <input
+                id="session-end-date"
+                type="date"
+                value={endDate}
+                min={startDate || undefined}
+                onChange={(event) => setEndDate(event.target.value)}
+                aria-invalid={dateRangeInvalid}
+                aria-describedby={
+                  dateRangeInvalid ? "session-date-range-error" : undefined
+                }
+                className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
+              />
+            </div>
+            <div className="min-w-0">
+              <label
+                htmlFor="session-page-filter"
+                className="mb-1.5 block text-xs font-medium text-zinc-600"
+              >
+                Page
+              </label>
+              <input
+                id="session-page-filter"
+                type="text"
+                value={pageQuery}
+                onChange={(event) => setPageQuery(event.target.value)}
+                placeholder="e.g. /listing"
+                className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-500 focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
+              />
+            </div>
 
-      <section className="border-t border-zinc-200 pt-10">
-        <h2 className="text-base font-semibold text-zinc-900">
-          Recording history
-        </h2>
-        <p className="mt-1 text-sm text-zinc-500">
-          Filter by date or page and open a session to watch it back
-        </p>
+            {dateRangeInvalid ? (
+              <p
+                id="session-date-range-error"
+                role="alert"
+                className="text-sm text-red-600"
+              >
+                From must be on or before To.
+              </p>
+            ) : null}
 
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div className="flex-1">
-            <label
-              htmlFor="session-start-date"
-              className="mb-1.5 block text-xs font-medium text-zinc-600"
-            >
-              From
-            </label>
-            <input
-              id="session-start-date"
-              type="date"
-              value={startDate}
-              onChange={(event) => setStartDate(event.target.value)}
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
-            />
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setStartDate("");
+                  setEndDate("");
+                  setPageQuery("");
+                }}
+                className="w-fit rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+              >
+                Clear filters
+              </button>
+            ) : null}
           </div>
-          <div className="flex-1">
-            <label
-              htmlFor="session-end-date"
-              className="mb-1.5 block text-xs font-medium text-zinc-600"
-            >
-              To
-            </label>
-            <input
-              id="session-end-date"
-              type="date"
-              value={endDate}
-              onChange={(event) => setEndDate(event.target.value)}
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
-            />
-          </div>
-          <div className="flex-1">
-            <label
-              htmlFor="session-page-filter"
-              className="mb-1.5 block text-xs font-medium text-zinc-600"
-            >
-              Page
-            </label>
-            <input
-              id="session-page-filter"
-              type="text"
-              value={pageQuery}
-              onChange={(event) => setPageQuery(event.target.value)}
-              placeholder="Filter by page, e.g. /listing"
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
-            />
-          </div>
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={() => {
-                setStartDate("");
-                setEndDate("");
-                setPageQuery("");
-              }}
-              className="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
-            >
-              Clear
-            </button>
-          )}
-        </div>
 
-        <ul className="mt-6 max-h-[400px] divide-y divide-zinc-200 overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-sm">
-          {filteredSessions.length > 0 ? (
-            filteredSessions.map((session) => {
-              const isSelected = session.sessionId === selectedSessionId;
+          <ul className="mt-4 max-h-72 divide-y divide-zinc-200 overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-sm lg:max-h-none lg:min-h-0 lg:flex-1">
+            {filteredSessions.length > 0 ? (
+              filteredSessions.map((session) => {
+                const isSelected = session.sessionId === selectedSessionId;
 
-              return (
-                <li key={session.sessionId}>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedSessionId(session.sessionId)}
-                    className={`flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors ${
-                      isSelected ? "bg-zinc-100" : "hover:bg-zinc-50"
-                    }`}
+                return (
+                  <li
+                    key={session.sessionId}
+                    ref={isSelected ? selectedItemRef : undefined}
                   >
-                    <span className="min-w-0">
-                      <span className="block text-sm font-medium text-zinc-900">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSessionId(session.sessionId)}
+                      aria-current={isSelected ? "true" : undefined}
+                      className={`flex w-full min-h-11 min-w-0 flex-col items-start gap-0.5 px-4 py-3 text-left transition-colors ${
+                        isSelected ? "bg-zinc-100" : "hover:bg-zinc-50"
+                      }`}
+                    >
+                      <span className="w-full min-w-0 truncate text-sm font-medium text-zinc-900">
                         {formatSessionTime(session.startedAt)}
                       </span>
-                      <span className="mt-0.5 block truncate text-sm text-zinc-500">
+                      <span className="w-full min-w-0 truncate text-xs text-zinc-500">
                         {session.firstPage}
                       </span>
-                    </span>
-                    <span className="shrink-0 text-right text-sm text-zinc-500">
-                      {session.eventCount.toLocaleString()} events
-                      <span className="mt-0.5 block">
+                      <span className="text-xs text-zinc-500">
+                        {session.eventCount.toLocaleString()} events ·{" "}
                         {formatDuration(session.startedAt, session.endedAt)}
                       </span>
-                    </span>
-                  </button>
-                </li>
-              );
-            })
+                    </button>
+                  </li>
+                );
+              })
+            ) : (
+              <li className="px-4 py-8 text-center text-sm text-zinc-500">
+                {sessions.length === 0
+                  ? "No recordings yet."
+                  : dateRangeInvalid
+                    ? "Choose a valid date range to see matching recordings."
+                    : "No recordings match these filters."}
+              </li>
+            )}
+          </ul>
+        </aside>
+
+        <section
+          aria-label="Selected recording"
+          className="min-w-0 border-t border-zinc-200 px-6 pt-8 pb-10 lg:overflow-y-auto lg:border-t-0 lg:px-8 lg:pt-0 lg:pb-10"
+        >
+          {selected ? (
+            <div className="flex flex-col gap-5">
+              <div>
+                <h2 className="min-w-0 break-words text-lg font-semibold text-zinc-900">
+                  {formatSessionTime(selected.startedAt)}
+                </h2>
+                <p className="mt-1 text-sm text-zinc-500">
+                  {isMostRecent ? "Most recent · " : ""}
+                  {selected.firstPage} ·{" "}
+                  {formatDuration(selected.startedAt, selected.endedAt)}
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+                <h3 className="text-base font-semibold text-zinc-900">
+                  Session summary
+                </h3>
+                {isLoadingSummary ? (
+                  <p
+                    role="status"
+                    className="mt-3 text-sm text-zinc-600"
+                  >
+                    Writing a summary…
+                  </p>
+                ) : (
+                  <p className="mt-3 text-sm leading-6 text-zinc-700">
+                    {aiSummary}
+                  </p>
+                )}
+              </div>
+
+              <SessionPlayer events={events} isLoading={isLoadingEvents} />
+            </div>
           ) : (
-            <li className="px-5 py-8 text-center text-sm text-zinc-500">
-              {sessions.length === 0
-                ? "No recordings yet."
-                : "No recordings match these filters."}
-            </li>
+            <div className="rounded-lg border border-dashed border-zinc-200 bg-white px-6 py-10 text-center">
+              <p className="text-sm text-zinc-600">No recordings yet</p>
+            </div>
           )}
-        </ul>
-      </section>
+        </section>
+      </div>
     </div>
   );
 }

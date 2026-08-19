@@ -28,7 +28,7 @@ export function ListingPageWireframe() {
         <div className="flex flex-col gap-10 lg:flex-row lg:gap-10">
           {/* Left: listing details (~61% / 1.4fr) */}
           <div className="min-w-0 flex-[1.4]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
               Featured listing
             </p>
 
@@ -83,13 +83,13 @@ export function ListingPageWireframe() {
               </p>
 
               <div className="mt-4 flex flex-col gap-3">
-                <div className="h-11 w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 text-sm leading-[44px] text-zinc-400">
+                <div className="h-11 w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 text-sm leading-[44px] text-zinc-500">
                   Your name
                 </div>
-                <div className="h-11 w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 text-sm leading-[44px] text-zinc-400">
+                <div className="h-11 w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 text-sm leading-[44px] text-zinc-500">
                   Email address
                 </div>
-                <div className="min-h-[112px] w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-400">
+                <div className="min-h-[112px] w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-500">
                   Message
                 </div>
                 <div className="flex h-11 w-full items-center justify-center rounded-md bg-zinc-800 text-sm font-medium text-white">

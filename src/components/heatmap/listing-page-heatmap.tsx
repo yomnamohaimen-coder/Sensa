@@ -21,6 +21,7 @@ type ListingPageHeatmapProps = {
   trackingId?: string | null;
   /** Pathname filter; defaults to the harbor-homes listing page under test. */
   page?: string;
+  accessibleName?: string;
 };
 
 const DEFAULT_RADIUS = 55;
@@ -181,10 +182,11 @@ function ContainedDocumentHeatmap({
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none absolute inset-0 z-[5]"
+      className="pointer-events-none absolute inset-0 z-[5] h-full w-full bg-transparent"
       width={width}
       height={height}
       aria-hidden="true"
+      style={{ backgroundColor: "transparent" }}
     />
   );
 }
@@ -193,14 +195,17 @@ export function ListingPageHeatmap({
   reportId,
   trackingId = null,
   page = "/listing/42",
+  accessibleName = "Click heatmap",
 }: ListingPageHeatmapProps) {
   const fitRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [snapshot, setSnapshot] = useState<PageSnapshot | null>(null);
   const [snapshotReady, setSnapshotReady] = useState(!trackingId);
   const [scale, setScale] = useState(1);
   const [nativeWidth, setNativeWidth] = useState(LISTING_WIREFRAME_WIDTH);
   const [nativeHeight, setNativeHeight] = useState(0);
+  const [overlaySize, setOverlaySize] = useState({ width: 0, height: 0 });
 
   const adapter = useMemo(
     () => createSensaHeatmapAdapter(reportId),
@@ -212,7 +217,6 @@ export function ListingPageHeatmap({
       page,
       device: "desktop" as const,
       types: ["click" as const],
-      // Prefer document-space events from our adapter (docX/docY).
       coordinateSpace: "document" as const,
     }),
     [page],
@@ -233,20 +237,30 @@ export function ListingPageHeatmap({
     let cancelled = false;
     setSnapshotReady(false);
 
-    getPageSnapshot(trackingId, page).then((row) => {
-      if (cancelled) {
-        return;
-      }
-      setSnapshot(row);
-      if (row) {
-        setNativeWidth(row.width);
-        setNativeHeight(row.height);
-      } else {
+    getPageSnapshot(trackingId, page)
+      .then((row) => {
+        if (cancelled) {
+          return;
+        }
+        setSnapshot(row);
+        if (row) {
+          setNativeWidth(row.width);
+          setNativeHeight(row.height);
+        } else {
+          setNativeWidth(LISTING_WIREFRAME_WIDTH);
+          setNativeHeight(0);
+        }
+        setSnapshotReady(true);
+      })
+      .catch(() => {
+        if (cancelled) {
+          return;
+        }
+        setSnapshot(null);
         setNativeWidth(LISTING_WIREFRAME_WIDTH);
         setNativeHeight(0);
-      }
-      setSnapshotReady(true);
-    });
+        setSnapshotReady(true);
+      });
 
     return () => {
       cancelled = true;
@@ -254,8 +268,27 @@ export function ListingPageHeatmap({
   }, [trackingId, page]);
 
   useLayoutEffect(() => {
+    const overlay = overlayRef.current;
+    if (!overlay || !usingSnapshot) {
+      return;
+    }
+
+    const update = () => {
+      setOverlaySize({
+        width: overlay.clientWidth,
+        height: overlay.clientHeight,
+      });
+    };
+
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(overlay);
+    return () => observer.disconnect();
+  }, [usingSnapshot, snapshot]);
+
+  useLayoutEffect(() => {
     const fit = fitRef.current;
-    if (!fit) {
+    if (!fit || usingSnapshot) {
       return;
     }
 
@@ -264,16 +297,11 @@ export function ListingPageHeatmap({
 
     const update = () => {
       const availableWidth = fit.clientWidth;
-      const widthForScale = usingSnapshot
-        ? nativeWidth
-        : LISTING_WIREFRAME_WIDTH;
       const nextScale =
-        availableWidth > 0 ? Math.min(1, availableWidth / widthForScale) : 1;
+        availableWidth > 0
+          ? Math.min(1, availableWidth / LISTING_WIREFRAME_WIDTH)
+          : 1;
       setScale(nextScale);
-
-      if (usingSnapshot) {
-        return nativeHeight;
-      }
 
       if (!measure) {
         return 0;
@@ -287,7 +315,7 @@ export function ListingPageHeatmap({
     };
 
     const height = update();
-    if (!usingSnapshot && height === 0) {
+    if (height === 0) {
       rafId = requestAnimationFrame(() => {
         update();
       });
@@ -297,7 +325,7 @@ export function ListingPageHeatmap({
       update();
     });
     observer.observe(fit);
-    if (measure && !usingSnapshot) {
+    if (measure) {
       observer.observe(measure);
     }
 
@@ -311,91 +339,101 @@ export function ListingPageHeatmap({
     ? Math.ceil(nativeHeight * scale)
     : undefined;
 
+  const overlayWidth = usingSnapshot ? overlaySize.width : nativeWidth;
+  const overlayHeight = usingSnapshot ? overlaySize.height : nativeHeight;
+  const canDrawHeatmap =
+    !isLoading &&
+    !error &&
+    hasEvents &&
+    overlayWidth > 0 &&
+    overlayHeight > 0 &&
+    (usingSnapshot || isMeasured);
+
+  const statusOverlay =
+    isLoading || error || (!isLoading && !error && !hasEvents) ? (
+      <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 px-6">
+        {isLoading ? (
+          <p role="status" className="text-sm text-zinc-600">
+            Loading heatmap…
+          </p>
+        ) : error ? (
+          <p role="alert" className="text-center text-sm text-red-600">
+            Could not load heatmap data. Please try again.
+          </p>
+        ) : (
+          <p role="status" className="text-center text-sm text-zinc-600">
+            Not enough click data yet
+          </p>
+        )}
+      </div>
+    ) : null;
+
   return (
-    <div
-      ref={fitRef}
-      className="w-full overflow-x-hidden rounded-lg border border-zinc-200 bg-zinc-50"
-    >
-      <div
-        className="w-full"
-        style={{
-          position: "relative",
-          height: scaledHeight,
-          maxHeight: "none",
-          overflow: "visible",
-        }}
-      >
-        {/*
-          Until the first non-zero measure, keep the stage in normal flow so
-          content can contribute real height. Absolute + empty spacer collapses
-          the measure target and sticks nativeHeight at 0.
-        */}
+    <figure className="m-0 w-full min-w-0" style={{ colorScheme: "light" }}>
+      {usingSnapshot && snapshot ? (
         <div
-          className={isMeasured ? "absolute top-0 left-0" : "relative"}
-          style={{
-            width: usingSnapshot ? nativeWidth : LISTING_WIREFRAME_WIDTH,
-            height: isMeasured ? nativeHeight : undefined,
-            transform: `scale(${scale})`,
-            transformOrigin: "top left",
-          }}
+          ref={overlayRef}
+          className="relative w-full overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50"
         >
-          <div ref={measureRef}>
-            {usingSnapshot && snapshot ? (
-              <img
-                src={snapshot.image_url}
-                alt=""
-                width={snapshot.width}
-                height={snapshot.height}
-                className="block max-w-none"
-                style={{ width: nativeWidth, height: nativeHeight }}
-                onLoad={(event) => {
-                  const img = event.currentTarget;
-                  if (img.naturalWidth > 0) {
-                    setNativeWidth(img.naturalWidth);
-                  }
-                  if (img.naturalHeight > 0) {
-                    setNativeHeight(img.naturalHeight);
-                  }
-                }}
-              />
-            ) : (
-              <ListingPageWireframe />
-            )}
-          </div>
-
-          {isLoading && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
-              <p className="text-sm text-zinc-600">Loading heatmap…</p>
-            </div>
-          )}
-
-          {!isLoading && error && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 px-6">
-              <p className="text-center text-sm text-red-600">
-                Could not load heatmap data. Please try again.
-              </p>
-            </div>
-          )}
-
-          {!isLoading && !error && !hasEvents && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 px-6">
-              <p className="text-center text-sm text-zinc-600">
-                Not enough click data yet
-              </p>
-            </div>
-          )}
-
-          {!isLoading && !error && hasEvents && isMeasured && (
+          <img
+            src={snapshot.image_url}
+            alt=""
+            width={snapshot.width}
+            height={snapshot.height}
+            className="relative z-0 block h-auto w-full"
+            onError={() => {
+              setSnapshot(null);
+              setNativeWidth(LISTING_WIREFRAME_WIDTH);
+              setNativeHeight(0);
+            }}
+          />
+          {canDrawHeatmap ? (
             <ContainedDocumentHeatmap
               events={data}
-              width={nativeWidth}
-              height={nativeHeight}
+              width={overlayWidth}
+              height={overlayHeight}
               radius={DEFAULT_RADIUS}
               opacity={DEFAULT_OPACITY}
             />
-          )}
+          ) : null}
+          {statusOverlay}
         </div>
-      </div>
-    </div>
+      ) : (
+        <div
+          ref={fitRef}
+          className="relative w-full overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50"
+        >
+          <div
+            className="relative w-full overflow-hidden"
+            style={{ height: scaledHeight }}
+          >
+            <div
+              className={isMeasured ? "absolute top-0 left-0" : "relative"}
+              style={{
+                width: LISTING_WIREFRAME_WIDTH,
+                height: isMeasured ? nativeHeight : undefined,
+                transform: `scale(${scale})`,
+                transformOrigin: "top left",
+              }}
+            >
+              <div ref={measureRef}>
+                <ListingPageWireframe />
+              </div>
+              {canDrawHeatmap ? (
+                <ContainedDocumentHeatmap
+                  events={data}
+                  width={overlayWidth}
+                  height={overlayHeight}
+                  radius={DEFAULT_RADIUS}
+                  opacity={DEFAULT_OPACITY}
+                />
+              ) : null}
+              {statusOverlay}
+            </div>
+          </div>
+        </div>
+      )}
+      <figcaption className="sr-only">{accessibleName}</figcaption>
+    </figure>
   );
 }
