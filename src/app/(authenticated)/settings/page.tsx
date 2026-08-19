@@ -34,9 +34,9 @@ export default async function SettingsPage() {
   const productName = profile?.product_name?.trim() ?? "";
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col px-6 py-10">
+    <div className="mx-auto flex w-full max-w-3xl flex-col py-10 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(2.5rem,calc(2.5rem+env(safe-area-inset-bottom)))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] sm:pr-[max(1.5rem,env(safe-area-inset-right))]">
       <header className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-ink">
+        <h1 className="break-words text-2xl font-semibold tracking-tight text-ink">
           Settings
         </h1>
         <p className="mt-2 max-w-prose text-sm text-ink-muted">

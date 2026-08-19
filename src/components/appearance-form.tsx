@@ -31,8 +31,8 @@ export function AppearanceForm() {
   }
 
   return (
-    <div className="rounded-lg border border-hairline bg-surface p-5 shadow-sm">
-      <p className="max-w-prose text-sm text-ink-muted">
+    <div className="min-w-0 rounded-lg border border-hairline bg-surface p-5 shadow-sm">
+      <p id="appearance-theme-hint" className="max-w-prose text-sm text-ink-muted">
         Choose how Sensa looks on this device. This does not follow your system
         setting.
       </p>
@@ -40,7 +40,8 @@ export function AppearanceForm() {
       <div
         role="radiogroup"
         aria-label="Color theme"
-        className="mt-5 flex w-full max-w-xs rounded-md bg-raised p-1"
+        aria-describedby="appearance-theme-hint"
+        className="mt-5 flex w-full min-w-0 rounded-md bg-raised p-1 sm:max-w-xs"
       >
         {OPTIONS.map((option, index) => {
           const isSelected = selected === option.value;
@@ -74,10 +75,10 @@ export function AppearanceForm() {
                   focusOption(OPTIONS.length - 1);
                 }
               }}
-              className={`flex-1 rounded px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted ${
+              className={`min-h-11 min-w-0 flex-1 rounded px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted ${
                 isSelected
                   ? "bg-surface text-ink shadow-sm"
-                  : "text-ink-muted hover:text-ink-secondary"
+                  : "text-ink-muted hover:text-ink-secondary active:bg-surface/80 active:text-ink"
               }`}
             >
               {option.label}

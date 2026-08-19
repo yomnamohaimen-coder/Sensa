@@ -1,13 +1,13 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 
 const PRODUCT_NAME_MAX_LENGTH = 120;
 
 const primaryButtonClassName =
-  "rounded-md bg-ink px-4 py-2 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex min-h-11 w-full items-center justify-center rounded-md bg-ink px-4 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover active:bg-ink-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto";
 
 type SettingsFormProps = {
   initialProductName: string;
@@ -17,6 +17,7 @@ export function SettingsForm({ initialProductName }: SettingsFormProps) {
   const router = useRouter();
   const errorId = useId();
   const statusId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [productName, setProductName] = useState(initialProductName);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -52,6 +53,7 @@ export function SettingsForm({ initialProductName }: SettingsFormProps) {
           saveError.message ||
             "Could not save product name. Please try again.",
         );
+        inputRef.current?.focus();
         return;
       }
 
@@ -59,6 +61,7 @@ export function SettingsForm({ initialProductName }: SettingsFormProps) {
       router.refresh();
     } catch {
       setError("Could not save product name. Check your connection and try again.");
+      inputRef.current?.focus();
     } finally {
       setIsSaving(false);
     }
@@ -82,10 +85,13 @@ export function SettingsForm({ initialProductName }: SettingsFormProps) {
           Product name
         </label>
         <input
+          ref={inputRef}
           id="product-name"
           type="text"
+          dir="auto"
           maxLength={PRODUCT_NAME_MAX_LENGTH}
           autoComplete="organization"
+          spellCheck={false}
           value={productName}
           onChange={(event) => {
             setProductName(event.target.value);
@@ -94,7 +100,7 @@ export function SettingsForm({ initialProductName }: SettingsFormProps) {
           }}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
-          className="w-full min-w-0 rounded-md border border-stroke px-3 py-2 text-base text-ink outline-none transition-colors placeholder:text-ink-muted focus:border-ink-muted focus:ring-1 focus:ring-ink-muted sm:text-sm"
+          className="min-h-11 w-full min-w-0 rounded-md border border-stroke px-3 py-2 text-base text-ink outline-none transition-colors placeholder:text-ink-muted focus:border-ink-muted focus:ring-1 focus:ring-ink-muted sm:text-sm"
           placeholder="Your product or company name"
         />
       </div>

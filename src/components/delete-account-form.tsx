@@ -37,9 +37,8 @@ export function DeleteAccountForm({
 
   isDeletingRef.current = isDeleting;
 
-  const confirmHint = productName
-    ? `${email} or ${productName}`
-    : email;
+  const confirmHint = [email, productName].filter(Boolean).join(" or ") ||
+    "your email address";
 
   function closeDialog() {
     if (isDeletingRef.current) {
@@ -57,6 +56,8 @@ export function DeleteAccountForm({
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : triggerRef.current;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
     confirmationRef.current?.focus();
 
@@ -101,6 +102,7 @@ export function DeleteAccountForm({
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
       previous?.focus();
     };
   }, [open]);
@@ -114,6 +116,7 @@ export function DeleteAccountForm({
       const result = await deleteAccount(confirmation);
       if ("error" in result) {
         setError(result.error);
+        confirmationRef.current?.focus();
         return;
       }
 
@@ -123,6 +126,7 @@ export function DeleteAccountForm({
       router.refresh();
     } catch {
       setError("Could not delete account. Check your connection and try again.");
+      confirmationRef.current?.focus();
     } finally {
       setIsDeleting(false);
     }
@@ -145,7 +149,7 @@ export function DeleteAccountForm({
               setError(null);
               setConfirmation("");
             }}
-            className="rounded-md bg-red-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-red-700 px-4 text-sm font-medium text-white transition-colors hover:bg-red-800 active:bg-red-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500 sm:w-auto"
           >
             Delete account
           </button>
@@ -154,7 +158,7 @@ export function DeleteAccountForm({
 
       {open ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-overlay px-4"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-overlay sm:items-center sm:px-4"
           onClick={closeDialog}
         >
           <div
@@ -163,7 +167,8 @@ export function DeleteAccountForm({
             aria-modal="true"
             aria-labelledby="delete-account-title"
             aria-describedby={descriptionId}
-            className="w-full max-w-md min-w-0 rounded-lg border border-red-200 bg-surface p-5 shadow-lg"
+            aria-busy={isDeleting || undefined}
+            className="max-h-[min(100dvh,100%)] w-full max-w-md min-w-0 overflow-y-auto rounded-t-lg border border-red-200 bg-surface p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pl-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))] shadow-lg sm:rounded-lg sm:pb-5"
             onClick={(event) => event.stopPropagation()}
           >
             <h3
@@ -193,16 +198,20 @@ export function DeleteAccountForm({
                 ref={confirmationRef}
                 id="delete-account-confirmation"
                 type="text"
+                dir="auto"
                 autoComplete="off"
+                spellCheck={false}
                 value={confirmation}
                 onChange={(event) => {
                   setConfirmation(event.target.value);
                   setError(null);
                 }}
                 aria-invalid={error ? true : undefined}
-                aria-describedby={error ? errorId : undefined}
-                className="w-full min-w-0 rounded-md border border-stroke px-3 py-2 text-base text-ink outline-none transition-colors placeholder:text-ink-muted focus:border-red-500 focus:ring-1 focus:ring-red-500 sm:text-sm"
-                placeholder={confirmHint}
+                aria-describedby={
+                  error ? `${descriptionId} ${errorId}` : descriptionId
+                }
+                className="min-h-11 w-full min-w-0 rounded-md border border-stroke px-3 py-2 text-base text-ink outline-none transition-colors placeholder:text-ink-muted focus:border-red-500 focus:ring-1 focus:ring-red-500 sm:text-sm"
+                placeholder="Email or product name"
               />
 
               {error ? (
@@ -215,19 +224,19 @@ export function DeleteAccountForm({
                 </p>
               ) : null}
 
-              <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
                 <button
                   type="button"
                   disabled={isDeleting}
                   onClick={closeDialog}
-                  className="rounded-md border border-stroke bg-surface px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-canvas focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted disabled:opacity-60"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-stroke bg-surface px-4 text-sm font-medium text-ink-secondary hover:bg-canvas active:bg-canvas focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted disabled:opacity-60 sm:w-auto"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isDeleting || !confirmation.trim()}
-                  className="rounded-md bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-red-700 px-4 text-sm font-medium text-white hover:bg-red-800 active:bg-red-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                 >
                   {isDeleting ? "Deleting…" : "Delete permanently"}
                 </button>

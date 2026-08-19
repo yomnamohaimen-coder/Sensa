@@ -1,14 +1,16 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 
+const PASSWORD_MAX_LENGTH = 72;
+
 const inputClassName =
-  "w-full min-w-0 rounded-md border border-stroke px-3 py-2 text-base text-ink outline-none transition-colors focus:border-ink-muted focus:ring-1 focus:ring-ink-muted sm:text-sm";
+  "min-h-11 w-full min-w-0 rounded-md border border-stroke px-3 py-2 text-base text-ink outline-none transition-colors focus:border-ink-muted focus:ring-1 focus:ring-ink-muted sm:text-sm";
 
 const primaryButtonClassName =
-  "rounded-md bg-ink px-4 py-2 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex min-h-11 w-full items-center justify-center rounded-md bg-ink px-4 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover active:bg-ink-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto";
 
 type PasswordField = "current" | "new" | "confirm";
 
@@ -39,6 +41,9 @@ export function ChangePasswordForm() {
   const router = useRouter();
   const errorId = useId();
   const statusId = useId();
+  const currentRef = useRef<HTMLInputElement>(null);
+  const newRef = useRef<HTMLInputElement>(null);
+  const confirmRef = useRef<HTMLInputElement>(null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -66,24 +71,33 @@ export function ChangePasswordForm() {
         new: !newPassword,
         confirm: !confirmPassword,
       });
+      (!currentPassword
+        ? currentRef
+        : !newPassword
+          ? newRef
+          : confirmRef
+      ).current?.focus();
       return;
     }
 
     if (newPassword !== confirmPassword) {
       setError("New password and confirmation do not match.");
       setInvalidFields({ confirm: true });
+      confirmRef.current?.focus();
       return;
     }
 
     if (newPassword.length < 6) {
       setError("New password must be at least 6 characters.");
       setInvalidFields({ new: true });
+      newRef.current?.focus();
       return;
     }
 
     if (newPassword === currentPassword) {
       setError("New password must be different from your current password.");
       setInvalidFields({ new: true });
+      newRef.current?.focus();
       return;
     }
 
@@ -108,6 +122,7 @@ export function ChangePasswordForm() {
       if (verifyError) {
         setError(mapPasswordUpdateError(verifyError.message, verifyError.code));
         setInvalidFields({ current: true });
+        currentRef.current?.focus();
         return;
       }
 
@@ -118,6 +133,7 @@ export function ChangePasswordForm() {
       if (updateError) {
         setError(mapPasswordUpdateError(updateError.message, updateError.code));
         setInvalidFields({ new: true });
+        newRef.current?.focus();
         return;
       }
 
@@ -128,6 +144,7 @@ export function ChangePasswordForm() {
     } catch {
       setError("Could not update password. Check your connection and try again.");
       setInvalidFields({ current: true });
+      currentRef.current?.focus();
     } finally {
       setIsSaving(false);
     }
@@ -153,10 +170,13 @@ export function ChangePasswordForm() {
             Current password
           </label>
           <input
+            ref={currentRef}
             id="current-password"
             type="password"
             autoComplete="current-password"
             required
+            maxLength={PASSWORD_MAX_LENGTH}
+            spellCheck={false}
             value={currentPassword}
             onChange={(event) => {
               setCurrentPassword(event.target.value);
@@ -178,11 +198,14 @@ export function ChangePasswordForm() {
             New password
           </label>
           <input
+            ref={newRef}
             id="new-password"
             type="password"
             autoComplete="new-password"
             required
             minLength={6}
+            maxLength={PASSWORD_MAX_LENGTH}
+            spellCheck={false}
             value={newPassword}
             onChange={(event) => {
               setNewPassword(event.target.value);
@@ -204,11 +227,14 @@ export function ChangePasswordForm() {
             Confirm new password
           </label>
           <input
+            ref={confirmRef}
             id="confirm-password"
             type="password"
             autoComplete="new-password"
             required
             minLength={6}
+            maxLength={PASSWORD_MAX_LENGTH}
+            spellCheck={false}
             value={confirmPassword}
             onChange={(event) => {
               setConfirmPassword(event.target.value);

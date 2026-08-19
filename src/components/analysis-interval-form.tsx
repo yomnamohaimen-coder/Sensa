@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import {
@@ -14,11 +14,13 @@ type AnalysisIntervalFormProps = {
   initialManualOnly: boolean;
 };
 
+const MAX_INTERVAL_DAYS = 365;
+
 const inputClassName =
-  "rounded-md border border-stroke bg-surface px-3 py-2 text-base text-ink outline-none transition-colors focus:border-ink-muted focus:ring-1 focus:ring-ink-muted disabled:cursor-not-allowed disabled:bg-canvas disabled:text-ink-muted sm:text-sm";
+  "min-h-11 rounded-md border border-stroke bg-surface px-3 py-2 text-base text-ink outline-none transition-colors focus:border-ink-muted focus:ring-1 focus:ring-ink-muted disabled:cursor-not-allowed disabled:bg-canvas disabled:text-ink-muted sm:text-sm";
 
 const primaryButtonClassName =
-  "rounded-md bg-ink px-4 py-2 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex min-h-11 w-full items-center justify-center rounded-md bg-ink px-4 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover active:bg-ink-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto";
 
 export function AnalysisIntervalForm({
   initialIntervalDays,
@@ -27,6 +29,7 @@ export function AnalysisIntervalForm({
   const router = useRouter();
   const errorId = useId();
   const statusId = useId();
+  const amountRef = useRef<HTMLInputElement>(null);
   const initial = splitAnalysisIntervalDays(initialIntervalDays);
   const [manualOnly, setManualOnly] = useState(initialManualOnly);
   const [amount, setAmount] = useState(String(initial.amount));
@@ -41,13 +44,27 @@ export function AnalysisIntervalForm({
     setSaved(false);
 
     const parsedAmount = Number(amount);
-    if (!Number.isFinite(parsedAmount) || parsedAmount < 1) {
+    const amountIsValid = Number.isFinite(parsedAmount) && parsedAmount >= 1;
+
+    if (!manualOnly && !amountIsValid) {
       setError("Enter at least 1 day (or 1 week).");
+      amountRef.current?.focus();
       return;
     }
 
-    const intervalDays = normalizeAnalysisIntervalDays(parsedAmount, unit);
-    setAmount(String(Math.max(1, Math.floor(parsedAmount))));
+    const intervalDays = amountIsValid
+      ? normalizeAnalysisIntervalDays(parsedAmount, unit)
+      : (initialIntervalDays ?? 3);
+
+    if (!manualOnly && intervalDays > MAX_INTERVAL_DAYS) {
+      setError("Choose an interval of 365 days or less.");
+      amountRef.current?.focus();
+      return;
+    }
+
+    if (amountIsValid) {
+      setAmount(String(Math.max(1, Math.floor(parsedAmount))));
+    }
     setIsSaving(true);
 
     try {
@@ -75,6 +92,9 @@ export function AnalysisIntervalForm({
           saveError.message ||
             "Could not save analysis settings. Please try again.",
         );
+        if (!manualOnly) {
+          amountRef.current?.focus();
+        }
         return;
       }
 
@@ -84,6 +104,9 @@ export function AnalysisIntervalForm({
       setError(
         "Could not save analysis settings. Check your connection and try again.",
       );
+      if (!manualOnly) {
+        amountRef.current?.focus();
+      }
     } finally {
       setIsSaving(false);
     }
@@ -100,7 +123,7 @@ export function AnalysisIntervalForm({
         Choose how often Sensa should turn new tracking data into a report.
       </p>
 
-      <label className="mt-5 flex min-h-11 cursor-pointer items-center gap-2 text-sm text-ink-secondary">
+      <label className="mt-5 flex min-h-11 cursor-pointer items-center gap-3 text-sm text-ink-secondary">
         <input
           type="checkbox"
           checked={manualOnly}
@@ -109,24 +132,25 @@ export function AnalysisIntervalForm({
             setSaved(false);
             setError(null);
           }}
-          className="h-4 w-4 rounded border-stroke text-ink focus:ring-ink-muted"
+          className="h-5 w-5 shrink-0 rounded border-stroke text-ink focus:ring-ink-muted"
         />
         Manually only
       </label>
 
-      <fieldset className="mt-4 min-w-0 border-0 p-0">
+      <fieldset className="mt-4 min-w-0 border-0 p-0" disabled={manualOnly}>
         <legend className="mb-1.5 text-sm font-medium text-ink-secondary">
           Generate new analysis every
         </legend>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <input
+            ref={amountRef}
             id="analysis-interval-amount"
             type="number"
             min={1}
+            max={MAX_INTERVAL_DAYS}
             step={1}
             inputMode="numeric"
             value={amount}
-            disabled={manualOnly}
             onChange={(event) => {
               setAmount(event.target.value);
               setSaved(false);
@@ -140,21 +164,20 @@ export function AnalysisIntervalForm({
                 setAmount(String(Math.floor(parsed)));
               }
             }}
-            className={`w-20 min-w-0 ${inputClassName}`}
+            className={`w-full min-w-0 sm:w-24 ${inputClassName}`}
             aria-label="Interval amount"
-            aria-invalid={error ? true : undefined}
-            aria-describedby={error ? errorId : undefined}
+            aria-invalid={error && !manualOnly ? true : undefined}
+            aria-describedby={error && !manualOnly ? errorId : undefined}
           />
           <select
             id="analysis-interval-unit"
             value={unit}
-            disabled={manualOnly}
             onChange={(event) => {
               setUnit(event.target.value as AnalysisIntervalUnit);
               setSaved(false);
               setError(null);
             }}
-            className={`w-28 min-w-0 ${inputClassName}`}
+            className={`w-full min-w-0 sm:w-32 ${inputClassName}`}
             aria-label="Interval unit"
           >
             <option value="days">Days</option>
