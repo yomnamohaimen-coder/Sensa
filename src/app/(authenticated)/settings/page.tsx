@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { AnalysisIntervalForm } from "@/components/analysis-interval-form";
 import { AppearanceForm } from "@/components/appearance-form";
 import { ChangePasswordForm } from "@/components/change-password-form";
@@ -19,10 +20,14 @@ export default async function SettingsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    redirect("/login");
+  }
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("product_name, analysis_interval_days, analysis_manual_only")
-    .eq("id", user!.id)
+    .eq("id", user.id)
     .maybeSingle();
 
   const intervalDays =
@@ -107,7 +112,7 @@ export default async function SettingsPage() {
           </p>
           <div className="mt-4">
             <DeleteAccountForm
-              email={user?.email ?? ""}
+              email={user.email ?? ""}
               productName={productName}
             />
           </div>

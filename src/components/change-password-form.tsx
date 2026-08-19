@@ -7,7 +7,7 @@ import { createClient } from "@/utils/supabase/client";
 const PASSWORD_MAX_LENGTH = 72;
 
 const inputClassName =
-  "min-h-11 w-full min-w-0 rounded-md border border-stroke px-3 py-2 text-base text-ink outline-none transition-colors focus:border-ink-muted focus:ring-1 focus:ring-ink-muted sm:text-sm";
+  "min-h-11 w-full min-w-0 rounded-md border border-stroke bg-surface px-3 py-2 text-base text-ink outline-none transition-colors focus:border-ink-muted focus:ring-1 focus:ring-ink-muted aria-invalid:border-alert aria-invalid:caret-alert-text aria-invalid:focus:border-alert aria-invalid:focus:ring-alert sm:text-sm";
 
 const primaryButtonClassName =
   "inline-flex min-h-11 w-full items-center justify-center rounded-md bg-ink px-4 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover active:bg-ink-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto";
@@ -60,6 +60,9 @@ export function ChangePasswordForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isSaving) {
+      return;
+    }
     setError(null);
     setSaved(false);
     setInvalidFields({});
@@ -155,6 +158,7 @@ export function ChangePasswordForm() {
       onSubmit={handleSubmit}
       className="min-w-0 rounded-lg border border-hairline bg-surface p-5 shadow-sm"
       noValidate
+      aria-busy={isSaving || undefined}
     >
       <h3 className="text-base font-semibold text-ink">Change password</h3>
       <p className="mt-1 max-w-prose text-sm text-ink-muted">
@@ -253,16 +257,20 @@ export function ChangePasswordForm() {
         <p
           id={errorId}
           role="alert"
-          className="mt-3 break-words text-sm text-red-600"
+          className="mt-3 break-words text-sm text-alert-text"
         >
           {error}
         </p>
       ) : null}
-      {saved && !error ? (
-        <p id={statusId} role="status" className="mt-3 text-sm text-green-700">
-          Password updated
-        </p>
-      ) : null}
+      <p
+        id={statusId}
+        role="status"
+        className={
+          saved && !error ? "mt-3 text-sm text-signal-text" : "sr-only"
+        }
+      >
+        {saved && !error ? "Password updated" : ""}
+      </p>
 
       <div className="mt-5">
         <button

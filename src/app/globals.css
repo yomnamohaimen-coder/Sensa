@@ -16,12 +16,16 @@
   --on-ink: #ffffff;
   --ink-hover: #27272a;
   --signal: #059669;
+  --signal-text: #047857;
   --deep-teal: #0f766e;
   --mint-arc: #5eead4;
   --alert: #b91c1c;
+  --alert-hover: #991b1b;
   --alert-text: #dc2626;
+  --alert-secondary: #9f1239;
   --alert-wash: #fef2f2;
   --alert-stroke: #fecaca;
+  --on-alert: #ffffff;
   --warning: #92400e;
   --warning-wash: #fffbeb;
   --warning-stroke: #fde68a;
@@ -45,9 +49,16 @@
   --color-on-ink: var(--on-ink);
   --color-ink-hover: var(--ink-hover);
   --color-signal: var(--signal);
+  --color-signal-text: var(--signal-text);
   --color-deep-teal: var(--deep-teal);
   --color-mint-arc: var(--mint-arc);
   --color-alert: var(--alert);
+  --color-alert-hover: var(--alert-hover);
+  --color-alert-text: var(--alert-text);
+  --color-alert-secondary: var(--alert-secondary);
+  --color-alert-wash: var(--alert-wash);
+  --color-alert-stroke: var(--alert-stroke);
+  --color-on-alert: var(--on-alert);
   --color-overlay: var(--overlay);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -67,12 +78,16 @@
   --on-ink: #18181b;
   --ink-hover: #e4e4e7;
   --signal: #34d399;
+  --signal-text: #34d399;
   --deep-teal: #0d9488;
   --mint-arc: #5eead4;
   --alert: #b91c1c;
+  --alert-hover: #991b1b;
   --alert-text: #f87171;
+  --alert-secondary: #fca5a5;
   --alert-wash: #450a0a;
   --alert-stroke: #7f1d1d;
+  --on-alert: #ffffff;
   --warning: #fbbf24;
   --warning-wash: #422006;
   --warning-stroke: #854d0e;
@@ -103,6 +118,7 @@ html,
 body {
   background: var(--canvas);
   color: var(--ink);
+  caret-color: var(--ink);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 

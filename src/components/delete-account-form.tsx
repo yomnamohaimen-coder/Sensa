@@ -109,6 +109,9 @@ export function DeleteAccountForm({
 
   async function handleDelete(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isDeletingRef.current) {
+      return;
+    }
     setError(null);
     setIsDeleting(true);
 
@@ -134,9 +137,9 @@ export function DeleteAccountForm({
 
   return (
     <>
-      <div className="rounded-lg border border-red-200 bg-red-50/60 p-5 shadow-sm">
-        <h3 className="text-base font-semibold text-ink">Delete account</h3>
-        <p className="mt-1 max-w-prose text-sm text-ink-secondary">
+      <div className="rounded-lg border border-alert-stroke bg-alert-wash p-5">
+        <h3 className="text-base font-semibold text-alert dark:text-alert-text">Delete account</h3>
+        <p className="mt-1 max-w-prose text-sm text-alert-secondary">
           Permanently remove your Sensa account, reports, tracking data, heatmaps,
           and session recordings. This cannot be undone.
         </p>
@@ -149,7 +152,7 @@ export function DeleteAccountForm({
               setError(null);
               setConfirmation("");
             }}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-red-700 px-4 text-sm font-medium text-white transition-colors hover:bg-red-800 active:bg-red-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-alert px-4 text-sm font-medium text-on-alert transition-colors hover:bg-alert-hover active:bg-alert-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-alert-text sm:w-auto"
           >
             Delete account
           </button>
@@ -168,15 +171,15 @@ export function DeleteAccountForm({
             aria-labelledby="delete-account-title"
             aria-describedby={descriptionId}
             aria-busy={isDeleting || undefined}
-            className="max-h-[min(100dvh,100%)] w-full max-w-md min-w-0 overflow-y-auto rounded-t-lg border border-red-200 bg-surface p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pl-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))] shadow-lg sm:rounded-lg sm:pb-5"
+            className="max-h-[min(100dvh,100%)] w-full max-w-md min-w-0 overflow-y-auto rounded-t-lg border border-alert-stroke bg-surface p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pl-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))] shadow-lg sm:rounded-lg sm:pb-5"
             onClick={(event) => event.stopPropagation()}
           >
-            <h3
+            <h2
               id="delete-account-title"
               className="text-base font-semibold text-ink"
             >
               Confirm account deletion
-            </h3>
+            </h2>
             <p
               id={descriptionId}
               className="mt-2 text-sm break-words text-ink-secondary"
@@ -187,7 +190,11 @@ export function DeleteAccountForm({
               confirm.
             </p>
 
-            <form onSubmit={handleDelete} className="mt-5">
+            <form
+              onSubmit={handleDelete}
+              className="mt-5"
+              aria-busy={isDeleting || undefined}
+            >
               <label
                 htmlFor="delete-account-confirmation"
                 className="mb-1.5 block text-sm font-medium text-ink-secondary"
@@ -210,7 +217,7 @@ export function DeleteAccountForm({
                 aria-describedby={
                   error ? `${descriptionId} ${errorId}` : descriptionId
                 }
-                className="min-h-11 w-full min-w-0 rounded-md border border-stroke px-3 py-2 text-base text-ink outline-none transition-colors placeholder:text-ink-muted focus:border-red-500 focus:ring-1 focus:ring-red-500 sm:text-sm"
+                className="min-h-11 w-full min-w-0 rounded-md border border-stroke bg-surface px-3 py-2 text-base text-ink caret-alert-text outline-none transition-colors placeholder:text-ink-muted focus:border-alert focus:ring-1 focus:ring-alert aria-invalid:border-alert sm:text-sm"
                 placeholder="Email or product name"
               />
 
@@ -218,7 +225,7 @@ export function DeleteAccountForm({
                 <p
                   id={errorId}
                   role="alert"
-                  className="mt-3 break-words text-sm text-red-600"
+                  className="mt-3 break-words text-sm text-alert-text"
                 >
                   {error}
                 </p>
@@ -229,14 +236,14 @@ export function DeleteAccountForm({
                   type="button"
                   disabled={isDeleting}
                   onClick={closeDialog}
-                  className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-stroke bg-surface px-4 text-sm font-medium text-ink-secondary hover:bg-canvas active:bg-canvas focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted disabled:opacity-60 sm:w-auto"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-stroke bg-surface px-4 text-sm font-medium text-ink-secondary transition-colors hover:bg-canvas active:bg-canvas focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isDeleting || !confirmation.trim()}
-                  className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-red-700 px-4 text-sm font-medium text-white hover:bg-red-800 active:bg-red-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-alert px-4 text-sm font-medium text-on-alert transition-colors hover:bg-alert-hover active:bg-alert-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-alert-text disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                 >
                   {isDeleting ? "Deleting…" : "Delete permanently"}
                 </button>

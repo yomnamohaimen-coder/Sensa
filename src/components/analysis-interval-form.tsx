@@ -17,7 +17,7 @@ type AnalysisIntervalFormProps = {
 const MAX_INTERVAL_DAYS = 365;
 
 const inputClassName =
-  "min-h-11 rounded-md border border-stroke bg-surface px-3 py-2 text-base text-ink outline-none transition-colors focus:border-ink-muted focus:ring-1 focus:ring-ink-muted disabled:cursor-not-allowed disabled:bg-canvas disabled:text-ink-muted sm:text-sm";
+  "min-h-11 rounded-md border border-stroke bg-surface px-3 py-2 text-base text-ink outline-none transition-colors focus:border-ink-muted focus:ring-1 focus:ring-ink-muted disabled:cursor-not-allowed disabled:bg-canvas disabled:text-ink-muted aria-invalid:border-alert aria-invalid:caret-alert-text aria-invalid:focus:border-alert aria-invalid:focus:ring-alert sm:text-sm";
 
 const primaryButtonClassName =
   "inline-flex min-h-11 w-full items-center justify-center rounded-md bg-ink px-4 text-sm font-medium text-on-ink transition-colors hover:bg-ink-hover active:bg-ink-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto";
@@ -40,6 +40,9 @@ export function AnalysisIntervalForm({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isSaving) {
+      return;
+    }
     setError(null);
     setSaved(false);
 
@@ -117,11 +120,9 @@ export function AnalysisIntervalForm({
       onSubmit={handleSubmit}
       className="min-w-0 rounded-lg border border-hairline bg-surface p-5 shadow-sm"
       noValidate
+      aria-busy={isSaving || undefined}
     >
       <h3 className="text-base font-semibold text-ink">Automatic analysis</h3>
-      <p className="mt-1 max-w-prose text-sm text-ink-muted">
-        Choose how often Sensa should turn new tracking data into a report.
-      </p>
 
       <label className="mt-5 flex min-h-11 cursor-pointer items-center gap-3 text-sm text-ink-secondary">
         <input
@@ -132,13 +133,16 @@ export function AnalysisIntervalForm({
             setSaved(false);
             setError(null);
           }}
-          className="h-5 w-5 shrink-0 rounded border-stroke text-ink focus:ring-ink-muted"
+          className="h-5 w-5 shrink-0 rounded border-stroke text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ink-muted"
         />
         Manually only
       </label>
 
-      <fieldset className="mt-4 min-w-0 border-0 p-0" disabled={manualOnly}>
-        <legend className="mb-1.5 text-sm font-medium text-ink-secondary">
+      <fieldset
+        className="group mt-4 min-w-0 border-0 p-0"
+        disabled={manualOnly}
+      >
+        <legend className="mb-1.5 text-sm font-medium text-ink-secondary group-disabled:text-ink-muted">
           Generate new analysis every
         </legend>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -164,7 +168,7 @@ export function AnalysisIntervalForm({
                 setAmount(String(Math.floor(parsed)));
               }
             }}
-            className={`w-full min-w-0 sm:w-24 ${inputClassName}`}
+            className={`w-full min-w-0 tabular-nums sm:w-24 ${inputClassName}`}
             aria-label="Interval amount"
             aria-invalid={error && !manualOnly ? true : undefined}
             aria-describedby={error && !manualOnly ? errorId : undefined}
@@ -190,16 +194,20 @@ export function AnalysisIntervalForm({
         <p
           id={errorId}
           role="alert"
-          className="mt-3 break-words text-sm text-red-600"
+          className="mt-3 break-words text-sm text-alert-text"
         >
           {error}
         </p>
       ) : null}
-      {saved && !error ? (
-        <p id={statusId} role="status" className="mt-3 text-sm text-green-700">
-          Saved
-        </p>
-      ) : null}
+      <p
+        id={statusId}
+        role="status"
+        className={
+          saved && !error ? "mt-3 text-sm text-signal-text" : "sr-only"
+        }
+      >
+        {saved && !error ? "Saved" : ""}
+      </p>
 
       <div className="mt-5">
         <button
