@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
+import { UNLABELED_HEATMAP_ELEMENT_LABEL } from "@/lib/reports/heatmap-element-labels";
 
 export type HeatmapElementStat = {
   label: string;
@@ -111,7 +112,7 @@ function elementLabel(metadata: ClickMetadata): string {
   if (tag && id) return `${tag}#${id}`;
   if (tag) return tag;
   if (id) return `#${id}`;
-  return "Unknown element";
+  return UNLABELED_HEATMAP_ELEMENT_LABEL;
 }
 
 export async function getReportHeatmapStats(

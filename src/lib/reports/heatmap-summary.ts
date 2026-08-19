@@ -1,4 +1,4 @@
-import type { ReportHeatmapStats } from "@/lib/reports/get-report-heatmap-stats";
+import { UNLABELED_HEATMAP_ELEMENT_LABEL } from "@/lib/reports/heatmap-element-labels";
 
 function describeHeatmapElementArea(label: string): string {
   const lower = label.toLowerCase();
@@ -22,17 +22,21 @@ function describeHeatmapElementArea(label: string): string {
     return `on a ${lower}`;
   }
 
-  if (lower === "unknown element") {
-    return "on an unlabeled element";
+  if (
+    label === UNLABELED_HEATMAP_ELEMENT_LABEL ||
+    lower === "unknown element"
+  ) {
+    return "on an unlabeled area (no name was captured for this click)";
   }
 
   return `on “${label}”`;
 }
 
 /** Plain-language summary for the heatmap stats panel (template, not AI). */
-export function buildHeatmapClickSummary(
-  stats: ReportHeatmapStats,
-): string | null {
+export function buildHeatmapClickSummary(stats: {
+  totalClicks: number;
+  topElements: Array<{ label: string; percent: number }>;
+}): string | null {
   const top = stats.topElements[0];
   if (!top || stats.totalClicks <= 0) {
     return null;
