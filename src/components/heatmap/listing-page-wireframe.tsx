@@ -11,11 +11,8 @@ export function ListingPageWireframe() {
       style={{ width: LISTING_WIREFRAME_WIDTH }}
       aria-hidden="true"
     >
-      {/* Full-bleed hero */}
-      <div
-        className="relative w-full bg-zinc-300"
-        style={{ height: "48vh", minHeight: 320 }}
-      >
+      {/* Full-bleed hero — fixed px so height does not track the app viewport */}
+      <div className="relative w-full bg-zinc-300" style={{ height: 420 }}>
         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-zinc-900/70 to-transparent" />
         <div className="absolute bottom-6 left-6 right-6">
           <div className="h-3 w-40 rounded bg-white/30" />

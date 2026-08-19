@@ -182,11 +182,10 @@ function ContainedDocumentHeatmap({
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none absolute inset-0 z-[5] h-full w-full bg-transparent"
+      className="pointer-events-none absolute inset-0 z-[5] block h-full w-full bg-transparent"
       width={width}
       height={height}
       aria-hidden="true"
-      style={{ backgroundColor: "transparent" }}
     />
   );
 }
@@ -199,7 +198,7 @@ export function ListingPageHeatmap({
 }: ListingPageHeatmapProps) {
   const fitRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
   const [snapshot, setSnapshot] = useState<PageSnapshot | null>(null);
   const [snapshotReady, setSnapshotReady] = useState(!trackingId);
   const [scale, setScale] = useState(1);
@@ -268,21 +267,21 @@ export function ListingPageHeatmap({
   }, [trackingId, page]);
 
   useLayoutEffect(() => {
-    const overlay = overlayRef.current;
-    if (!overlay || !usingSnapshot) {
+    const image = imageRef.current;
+    if (!image || !usingSnapshot) {
       return;
     }
 
     const update = () => {
       setOverlaySize({
-        width: overlay.clientWidth,
-        height: overlay.clientHeight,
+        width: image.clientWidth,
+        height: image.clientHeight,
       });
     };
 
     update();
     const observer = new ResizeObserver(update);
-    observer.observe(overlay);
+    observer.observe(image);
     return () => observer.disconnect();
   }, [usingSnapshot, snapshot]);
 
@@ -335,10 +334,6 @@ export function ListingPageHeatmap({
     };
   }, [usingSnapshot, nativeWidth, nativeHeight]);
 
-  const scaledHeight = isMeasured
-    ? Math.ceil(nativeHeight * scale)
-    : undefined;
-
   const overlayWidth = usingSnapshot ? overlaySize.width : nativeWidth;
   const overlayHeight = usingSnapshot ? overlaySize.height : nativeHeight;
   const canDrawHeatmap =
@@ -369,22 +364,26 @@ export function ListingPageHeatmap({
     ) : null;
 
   return (
-    <figure className="m-0 w-full min-w-0" style={{ colorScheme: "light" }}>
+    <figure className="m-0 block h-auto w-full min-w-0 leading-none" style={{ colorScheme: "light" }}>
       {usingSnapshot && snapshot ? (
-        <div
-          ref={overlayRef}
-          className="relative w-full overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50"
-        >
+        <div className="relative block h-auto w-full overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 leading-none">
           <img
+            ref={imageRef}
             src={snapshot.image_url}
             alt=""
-            width={snapshot.width}
-            height={snapshot.height}
             className="relative z-0 block h-auto w-full"
+            onLoad={(event) => {
+              const img = event.currentTarget;
+              setOverlaySize({
+                width: img.clientWidth,
+                height: img.clientHeight,
+              });
+            }}
             onError={() => {
               setSnapshot(null);
               setNativeWidth(LISTING_WIREFRAME_WIDTH);
               setNativeHeight(0);
+              setOverlaySize({ width: 0, height: 0 });
             }}
           />
           {canDrawHeatmap ? (
@@ -401,35 +400,30 @@ export function ListingPageHeatmap({
       ) : (
         <div
           ref={fitRef}
-          className="relative w-full overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50"
+          className="relative block h-auto w-full overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 leading-none"
         >
           <div
-            className="relative w-full overflow-hidden"
-            style={{ height: scaledHeight }}
+            className="relative"
+            style={{
+              width: LISTING_WIREFRAME_WIDTH,
+              transform: `scale(${scale})`,
+              transformOrigin: "top left",
+              marginBottom: isMeasured ? nativeHeight * (scale - 1) : 0,
+            }}
           >
-            <div
-              className={isMeasured ? "absolute top-0 left-0" : "relative"}
-              style={{
-                width: LISTING_WIREFRAME_WIDTH,
-                height: isMeasured ? nativeHeight : undefined,
-                transform: `scale(${scale})`,
-                transformOrigin: "top left",
-              }}
-            >
-              <div ref={measureRef}>
-                <ListingPageWireframe />
-              </div>
-              {canDrawHeatmap ? (
-                <ContainedDocumentHeatmap
-                  events={data}
-                  width={overlayWidth}
-                  height={overlayHeight}
-                  radius={DEFAULT_RADIUS}
-                  opacity={DEFAULT_OPACITY}
-                />
-              ) : null}
-              {statusOverlay}
+            <div ref={measureRef}>
+              <ListingPageWireframe />
             </div>
+            {canDrawHeatmap ? (
+              <ContainedDocumentHeatmap
+                events={data}
+                width={overlayWidth}
+                height={overlayHeight}
+                radius={DEFAULT_RADIUS}
+                opacity={DEFAULT_OPACITY}
+              />
+            ) : null}
+            {statusOverlay}
           </div>
         </div>
       )}

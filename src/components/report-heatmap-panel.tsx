@@ -25,7 +25,7 @@ export function ReportHeatmapPanel({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-auto w-full flex-col gap-4">
       <div className="rounded-md border border-zinc-200 bg-zinc-50 px-5 py-4">
         <p className="text-sm font-medium text-zinc-900">
           {clickCount.toLocaleString()} clicks

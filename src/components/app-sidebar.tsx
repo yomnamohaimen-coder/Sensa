@@ -172,7 +172,7 @@ export function AppSidebar() {
 
   return (
     <aside
-      className={`flex h-screen shrink-0 flex-col overflow-hidden border-r border-zinc-200 bg-white transition-[width] duration-200 ease-out ${
+      className={`flex shrink-0 flex-col overflow-hidden border-r border-zinc-200 bg-white transition-[width] duration-200 ease-out ${
         collapsed ? "w-14" : "w-56"
       }`}
       aria-label="Main navigation"
