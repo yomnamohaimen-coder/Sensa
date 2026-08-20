@@ -32,6 +32,77 @@ function NoDataMessage() {
   return <EmptyChartPlaceholder message="No data available" />;
 }
 
+function ChevronIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
+function InsightExplainability({
+  metrics,
+}: {
+  metrics: CalculatedReportMetrics | null;
+}) {
+  return (
+    <details className="mt-3 group rounded-md border border-hairline bg-canvas">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 py-2 text-xs font-medium text-ink-secondary outline-none marker:content-none [&::-webkit-details-marker]:hidden focus-visible:ring-1 focus-visible:ring-ink-muted">
+        <ChevronIcon className="h-4 w-4 shrink-0 text-ink-muted transition-transform group-open:rotate-180" />
+        Data the AI was given for these insights
+      </summary>
+      <div className="border-t border-hairline px-3 py-2">
+        {metrics ? (
+          <dl className="space-y-1.5 text-xs text-ink-muted">
+            <div>
+              <dt className="font-medium text-ink-secondary">Funnel</dt>
+              <dd className="mt-0.5">
+                <ul className="list-none space-y-0.5">
+                  {metrics.funnel.map((stage) => (
+                    <li key={stage.step}>
+                      {stage.step}: {stage.count.toLocaleString()} sessions
+                      {stage.dropOff === "—"
+                        ? " (first stage)"
+                        : ` (${stage.dropOff} drop-off from previous stage)`}
+                    </li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+            <div>
+              <dt className="font-medium text-ink-secondary">Engagement</dt>
+              <dd className="mt-0.5">
+                <ul className="list-none space-y-0.5">
+                  <li>Avg. time on page: {metrics.engagement.avgTimeOnPage}</li>
+                  <li>Bounce rate: {metrics.engagement.bounceRate}</li>
+                  <li>
+                    Pages per session: {metrics.engagement.pagesPerSession}
+                  </li>
+                </ul>
+              </dd>
+            </div>
+          </dl>
+        ) : (
+          <p className="text-xs text-ink-muted">
+            Metrics for this report are not available, so the numbers behind
+            these insights cannot be shown.
+          </p>
+        )}
+      </div>
+    </details>
+  );
+}
+
 function MetricWarning({ label }: { label: string }) {
   return (
     <span className="inline-flex align-middle" title={label}>
@@ -133,16 +204,17 @@ export function ReportView({
             <p className="max-w-prose leading-6 text-ink-secondary">
               {report.aiInsights.summary}
             </p>
-            {report.aiInsights.anomaly && (
+            {report.aiInsights.anomaly ? (
               <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-900">
                 <span className="font-medium">Anomaly:</span>{" "}
                 {report.aiInsights.anomaly}
               </div>
-            )}
+            ) : null}
             <div className="rounded-md border border-hairline bg-canvas px-3 py-2 text-ink-secondary">
               <span className="font-medium text-ink">Recommendation:</span>{" "}
               {report.aiInsights.recommendation}
             </div>
+            <InsightExplainability metrics={metrics} />
           </div>
         ) : (
           <NoDataMessage />
