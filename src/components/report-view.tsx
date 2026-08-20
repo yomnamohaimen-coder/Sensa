@@ -10,6 +10,7 @@ import {
   type TrendChange,
 } from "@/lib/analytics/percent-change";
 import type { ReportDisplay } from "@/lib/reports/build-report-display";
+import { Database } from "lucide-react";
 
 const HIGH_DURATION_MS = 60 * 60 * 1000;
 const TRACKING_ISSUE = "Unusually high — may indicate a tracking issue";
@@ -56,43 +57,95 @@ function InsightExplainability({
 }: {
   metrics: CalculatedReportMetrics | null;
 }) {
+  const funnelBase = metrics?.funnel[0]?.count ?? 0;
+
   return (
     <details className="mt-3 group rounded-md border border-hairline bg-canvas">
       <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3 py-2 text-xs font-medium text-ink-secondary outline-none marker:content-none [&::-webkit-details-marker]:hidden focus-visible:ring-1 focus-visible:ring-ink-muted">
         <ChevronIcon className="h-4 w-4 shrink-0 text-ink-muted transition-transform group-open:rotate-180" />
+        <Database
+          aria-hidden
+          className="h-3.5 w-3.5 shrink-0 text-ink-faint"
+          strokeWidth={1.75}
+        />
         Data the AI was given for these insights
       </summary>
-      <div className="border-t border-hairline px-3 py-2">
+      <div className="border-t border-hairline px-3 py-3">
         {metrics ? (
-          <dl className="space-y-1.5 text-xs text-ink-muted">
+          <div className="space-y-3">
             <div>
-              <dt className="font-medium text-ink-secondary">Funnel</dt>
-              <dd className="mt-0.5">
-                <ul className="list-none space-y-0.5">
-                  {metrics.funnel.map((stage) => (
-                    <li key={stage.step}>
-                      {stage.step}: {stage.count.toLocaleString()} sessions
-                      {stage.dropOff === "—"
-                        ? " (first stage)"
-                        : ` (${stage.dropOff} drop-off from previous stage)`}
+              <p className="text-xs font-medium text-ink-secondary">Funnel</p>
+              <ul className="mt-2 list-none space-y-2">
+                {metrics.funnel.map((stage) => {
+                  const widthPercent =
+                    funnelBase > 0
+                      ? Math.max(0, Math.min(100, (stage.count / funnelBase) * 100))
+                      : 0;
+
+                  return (
+                    <li key={stage.step} className="min-w-0">
+                      <div className="flex min-w-0 flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+                        <span className="truncate text-xs text-ink-secondary">
+                          {stage.step}
+                        </span>
+                        <span className="shrink-0 text-xs text-ink-muted">
+                          {stage.count.toLocaleString()} sessions
+                          {stage.dropOff === "—"
+                            ? " · first stage"
+                            : ` · ${stage.dropOff} drop-off`}
+                        </span>
+                      </div>
+                      <div
+                        className="mt-1 h-1 w-full overflow-hidden rounded-sm bg-raised"
+                        aria-hidden
+                      >
+                        <div
+                          className="h-full rounded-sm bg-ink-muted/70"
+                          style={{ width: `${widthPercent}%` }}
+                        />
+                      </div>
                     </li>
-                  ))}
-                </ul>
-              </dd>
+                  );
+                })}
+              </ul>
             </div>
-            <div>
-              <dt className="font-medium text-ink-secondary">Engagement</dt>
-              <dd className="mt-0.5">
-                <ul className="list-none space-y-0.5">
-                  <li>Avg. time on page: {metrics.engagement.avgTimeOnPage}</li>
-                  <li>Bounce rate: {metrics.engagement.bounceRate}</li>
-                  <li>
-                    Pages per session: {metrics.engagement.pagesPerSession}
-                  </li>
-                </ul>
-              </dd>
+
+            <div className="border-t border-hairline pt-3">
+              <p className="text-xs font-medium text-ink-secondary">
+                Engagement
+              </p>
+              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                {(
+                  [
+                    {
+                      label: "Avg. time on page",
+                      value: metrics.engagement.avgTimeOnPage,
+                    },
+                    {
+                      label: "Bounce rate",
+                      value: metrics.engagement.bounceRate,
+                    },
+                    {
+                      label: "Pages per session",
+                      value: metrics.engagement.pagesPerSession,
+                    },
+                  ] as const
+                ).map((tile) => (
+                  <div
+                    key={tile.label}
+                    className="rounded-md border border-hairline bg-surface px-2.5 py-2 text-center"
+                  >
+                    <p className="text-sm font-semibold tabular-nums text-ink">
+                      {tile.value}
+                    </p>
+                    <p className="mt-0.5 text-xs leading-snug text-ink-muted">
+                      {tile.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </dl>
+          </div>
         ) : (
           <p className="text-xs text-ink-muted">
             Metrics for this report are not available, so the numbers behind
