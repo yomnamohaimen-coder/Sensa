@@ -1,3 +1,18 @@
 {
-  "buildPath": "code"
+  "buildPath": "code",
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/components/insight-cards.tsx"
+        ],
+        "createdAt": "2026-08-20T22:21:33.826Z",
+        "reason": "User confirmed: anomaly insight uses border-l-4 warning accent (Meaning-Only), not decorative side-tab"
+      }
+    ]
+  }
 }

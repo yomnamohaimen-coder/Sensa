@@ -1,6 +1,7 @@
 import { TrendIndicator } from "@/components/dashboard-metrics";
 import { EmptyChartPlaceholder } from "@/components/empty-states";
 import { FunnelChart } from "@/components/funnel-chart";
+import { InsightCards } from "@/components/insight-cards";
 import type { CalculatedReportMetrics } from "@/lib/analytics/calculate-report-metrics";
 import {
   parseDurationMs,
@@ -200,20 +201,12 @@ export function ReportView({
 
       <Section title="AI insights">
         {report.aiInsights ? (
-          <div className="flex flex-col gap-4 text-sm">
-            <p className="max-w-prose leading-6 text-ink-secondary">
-              {report.aiInsights.summary}
-            </p>
-            {report.aiInsights.anomaly ? (
-              <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-900">
-                <span className="font-medium">Anomaly:</span>{" "}
-                {report.aiInsights.anomaly}
-              </div>
-            ) : null}
-            <div className="rounded-md border border-hairline bg-canvas px-3 py-2 text-ink-secondary">
-              <span className="font-medium text-ink">Recommendation:</span>{" "}
-              {report.aiInsights.recommendation}
-            </div>
+          <div className="flex flex-col gap-3">
+            <InsightCards
+              summary={report.aiInsights.summary}
+              anomaly={report.aiInsights.anomaly}
+              recommendation={report.aiInsights.recommendation}
+            />
             <InsightExplainability metrics={metrics} />
           </div>
         ) : (
