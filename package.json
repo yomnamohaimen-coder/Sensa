@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:migrate:profiles": "node scripts/apply-profiles-migration.mjs"
+    "db:migrate:profiles": "node scripts/apply-profiles-migration.mjs",
+    "test:e2e": "PLAYWRIGHT_BROWSERS_PATH=0 playwright test",
+    "test:e2e:ui": "PLAYWRIGHT_BROWSERS_PATH=0 playwright test --ui",
+    "test:e2e:purge": "node e2e/scripts/purge-e2e-users.mjs",
+    "dev:e2e": "bash -c 'set -a && source .env.e2e.local && set +a && next dev -p 3001'"
   },
   "dependencies": {
     "@rrweb/record": "^2.1.1",
@@ -24,6 +28,7 @@
     "rrweb-player": "^2.1.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

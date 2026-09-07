@@ -141,7 +141,7 @@ export async function getReportHeatmapStats(
     }
 
     totalClicks += 1;
-    const label = elementLabel(metadata);
+    const label = elementLabel(metadata!);
     counts.set(label, (counts.get(label) ?? 0) + 1);
   }
 

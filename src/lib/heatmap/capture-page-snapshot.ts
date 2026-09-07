@@ -101,7 +101,7 @@ export async function capturePageSnapshot(
 ): Promise<CapturePageSnapshotResult> {
   const resolved = resolveCaptureUrl(input.page, input.baseUrl);
   if ("error" in resolved) {
-    return { ok: false, error: resolved.error };
+    return { ok: false, error: resolved.error ?? "Invalid capture URL." };
   }
 
   let service;

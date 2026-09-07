@@ -30,6 +30,8 @@
     var SESSION_TIMEOUT_MS = 30 * 60 * 1000;
     var memorySessionId = null;
     var memoryActivityAt = 0;
+    var lastTrackedPage = null;
+    var spaRouteTrackingBound = false;
     // Only written after a successful /api/snapshot response.
     var SNAPSHOT_KEY_PREFIX = "sensa_snap_ok:";
     var SNAPSHOT_SETTLE_MS = 1000;
@@ -202,6 +204,65 @@
         }
 
         send(eventType.trim(), metadata == null ? null : metadata);
+      } catch (error) {
+        // Fail silently.
+      }
+    }
+
+    function trackPageViewIfChanged(options) {
+      try {
+        var page = getPage();
+        if (page === lastTrackedPage) {
+          return;
+        }
+
+        lastTrackedPage = page;
+        var metadata = {
+          title: document.title || null,
+        };
+
+        if (
+          options &&
+          Object.prototype.hasOwnProperty.call(options, "referrer")
+        ) {
+          metadata.referrer = options.referrer || null;
+        }
+
+        send("page_view", metadata);
+      } catch (error) {
+        // Fail silently.
+      }
+    }
+
+    function bindSpaRouteTracking() {
+      if (spaRouteTrackingBound) {
+        return;
+      }
+      spaRouteTrackingBound = true;
+
+      try {
+        var originalPushState = history.pushState;
+        var originalReplaceState = history.replaceState;
+
+        if (typeof originalPushState === "function") {
+          history.pushState = function () {
+            var result = originalPushState.apply(this, arguments);
+            trackPageViewIfChanged();
+            return result;
+          };
+        }
+
+        if (typeof originalReplaceState === "function") {
+          history.replaceState = function () {
+            var result = originalReplaceState.apply(this, arguments);
+            trackPageViewIfChanged();
+            return result;
+          };
+        }
+
+        window.addEventListener("popstate", function () {
+          trackPageViewIfChanged();
+        });
       } catch (error) {
         // Fail silently.
       }
@@ -786,9 +847,8 @@
     }
 
     clearLegacySnapshotMarks();
-
-    send("page_view", {
-      title: document.title || null,
+    bindSpaRouteTracking();
+    trackPageViewIfChanged({
       referrer: document.referrer || null,
     });
 

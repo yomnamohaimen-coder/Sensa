@@ -41,7 +41,7 @@ export function SessionPlayer({ events, isLoading }: SessionPlayerProps) {
     });
 
     return () => {
-      player.$destroy();
+      (player as { $destroy?: () => void }).$destroy?.();
       target.replaceChildren();
     };
   }, [events, isLoading]);
