@@ -18,15 +18,17 @@ export function HeatmapPageContent({
 }: HeatmapPageContentProps) {
   const router = useRouter();
   const selectedItemRef = useRef<HTMLLIElement>(null);
-  const [selectedReportId, setSelectedReportId] = useState(
+  const [requestedReportId, setRequestedReportId] = useState(
     initialSelectedReportId ?? reports[0]?.id ?? "",
   );
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
   const selectedReport =
-    reports.find((report) => report.id === selectedReportId) ??
+    reports.find((report) => report.id === requestedReportId) ??
     reports[0];
+  // An unknown id in the URL falls back to the newest report.
+  const selectedReportId = selectedReport?.id ?? "";
 
   const dateRangeInvalid = Boolean(
     startDate && endDate && endDate < startDate,
@@ -49,18 +51,17 @@ export function HeatmapPageContent({
   }, [reports, startDate, endDate, dateRangeInvalid]);
 
   function handleSelectReport(reportId: string) {
-    setSelectedReportId(reportId);
+    setRequestedReportId(reportId);
     router.replace(`/heatmap?report=${reportId}`, { scroll: false });
   }
 
   useEffect(() => {
-    if (!selectedReport || selectedReport.id === selectedReportId) {
+    if (!selectedReportId || selectedReportId === requestedReportId) {
       return;
     }
 
-    setSelectedReportId(selectedReport.id);
-    router.replace(`/heatmap?report=${selectedReport.id}`, { scroll: false });
-  }, [selectedReport, selectedReportId, router]);
+    router.replace(`/heatmap?report=${selectedReportId}`, { scroll: false });
+  }, [selectedReportId, requestedReportId, router]);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia(

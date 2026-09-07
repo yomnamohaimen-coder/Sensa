@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 
 const OPTIONS = [
@@ -10,14 +10,27 @@ const OPTIONS = [
 
 type ThemeValue = (typeof OPTIONS)[number]["value"];
 
+/** Theme lives in localStorage, so the control only renders after hydration. */
+function subscribeMounted() {
+  return () => {};
+}
+
+function isMountedOnClient() {
+  return true;
+}
+
+function isMountedOnServer() {
+  return false;
+}
+
 export function AppearanceForm() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    subscribeMounted,
+    isMountedOnClient,
+    isMountedOnServer,
+  );
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const selected: ThemeValue = mounted && theme === "dark" ? "dark" : "light";
 

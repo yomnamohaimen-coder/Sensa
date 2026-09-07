@@ -38,14 +38,10 @@ export function FunnelChart({
   const hasData = steps.some((step) => step.count > 0);
   const [animateIn, setAnimateIn] = useState(false);
 
+  // Reduced motion is handled by the bars' `motion-reduce:transition-none`,
+  // so the grow-in always starts from the same post-mount frame.
   useEffect(() => {
     if (!hasData) {
-      return;
-    }
-
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (media.matches) {
-      setAnimateIn(true);
       return;
     }
 

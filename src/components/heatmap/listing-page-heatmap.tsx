@@ -24,6 +24,12 @@ type ListingPageHeatmapProps = {
   accessibleName?: string;
 };
 
+/** Snapshot tagged with the `trackingId|page` request that produced it. */
+type LoadedSnapshot = {
+  key: string;
+  snapshot: PageSnapshot | null;
+};
+
 const DEFAULT_RADIUS = 55;
 const DEFAULT_OPACITY = 0.8;
 
@@ -199,8 +205,9 @@ export function ListingPageHeatmap({
   const fitRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
-  const [snapshot, setSnapshot] = useState<PageSnapshot | null>(null);
-  const [snapshotReady, setSnapshotReady] = useState(!trackingId);
+  const [loadedSnapshot, setLoadedSnapshot] = useState<LoadedSnapshot | null>(
+    null,
+  );
   const [scale, setScale] = useState(1);
   const [nativeWidth, setNativeWidth] = useState(LISTING_WIREFRAME_WIDTH);
   const [nativeHeight, setNativeHeight] = useState(0);
@@ -223,25 +230,30 @@ export function ListingPageHeatmap({
 
   const { data, isLoading, error } = useHeatmapData(adapter, query);
   const hasEvents = data.length > 0;
+
+  // Without a tracking id there is nothing to fetch, so the wireframe is ready
+  // immediately; otherwise only a snapshot matching this request counts.
+  const snapshotKey = trackingId ? `${trackingId}|${page}` : null;
+  const snapshotReady =
+    snapshotKey === null || loadedSnapshot?.key === snapshotKey;
+  const snapshot =
+    loadedSnapshot?.key === snapshotKey ? loadedSnapshot.snapshot : null;
   const usingSnapshot = snapshotReady && snapshot !== null;
   const isMeasured = nativeHeight > 0 && nativeWidth > 0;
 
   useEffect(() => {
-    if (!trackingId) {
-      setSnapshot(null);
-      setSnapshotReady(true);
+    if (!trackingId || !snapshotKey) {
       return;
     }
 
     let cancelled = false;
-    setSnapshotReady(false);
 
     getPageSnapshot(trackingId, page)
       .then((row) => {
         if (cancelled) {
           return;
         }
-        setSnapshot(row);
+        setLoadedSnapshot({ key: snapshotKey, snapshot: row });
         if (row) {
           setNativeWidth(row.width);
           setNativeHeight(row.height);
@@ -249,22 +261,20 @@ export function ListingPageHeatmap({
           setNativeWidth(LISTING_WIREFRAME_WIDTH);
           setNativeHeight(0);
         }
-        setSnapshotReady(true);
       })
       .catch(() => {
         if (cancelled) {
           return;
         }
-        setSnapshot(null);
+        setLoadedSnapshot({ key: snapshotKey, snapshot: null });
         setNativeWidth(LISTING_WIREFRAME_WIDTH);
         setNativeHeight(0);
-        setSnapshotReady(true);
       });
 
     return () => {
       cancelled = true;
     };
-  }, [trackingId, page]);
+  }, [trackingId, page, snapshotKey]);
 
   useLayoutEffect(() => {
     const image = imageRef.current;
@@ -380,7 +390,9 @@ export function ListingPageHeatmap({
               });
             }}
             onError={() => {
-              setSnapshot(null);
+              if (snapshotKey) {
+                setLoadedSnapshot({ key: snapshotKey, snapshot: null });
+              }
               setNativeWidth(LISTING_WIREFRAME_WIDTH);
               setNativeHeight(0);
               setOverlaySize({ width: 0, height: 0 });

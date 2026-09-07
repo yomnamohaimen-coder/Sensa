@@ -33,6 +33,17 @@ function formatDuration(startedAt: string, endedAt: string) {
   return seconds === 0 ? `${minutes}m` : `${minutes}m ${seconds}s`;
 }
 
+/** Loaded replay data tagged with its session so stale results never render. */
+type SessionDetail = {
+  sessionId: string;
+  events: unknown[];
+  eventsLoaded: boolean;
+  summary: string | null;
+  summaryLoaded: boolean;
+};
+
+const NO_EVENTS: unknown[] = [];
+
 export function SessionRecordingsPageContent({
   sessions,
 }: {
@@ -42,10 +53,7 @@ export function SessionRecordingsPageContent({
   const [selectedSessionId, setSelectedSessionId] = useState(
     sessions[0]?.sessionId ?? "",
   );
-  const [events, setEvents] = useState<unknown[]>([]);
-  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
-  const [aiSummary, setAiSummary] = useState<string | null>(null);
-  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
+  const [detail, setDetail] = useState<SessionDetail | null>(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [pageQuery, setPageQuery] = useState("");
@@ -87,53 +95,55 @@ export function SessionRecordingsPageContent({
 
   const hasActiveFilters = Boolean(startDate || endDate || pageQuery.trim());
 
+  const loaded = detail?.sessionId === selectedSessionId ? detail : null;
+  const events = loaded?.events ?? NO_EVENTS;
+  const aiSummary = loaded?.summary ?? null;
+  const isLoadingEvents = Boolean(selectedSessionId) && !loaded?.eventsLoaded;
+  const isLoadingSummary = Boolean(selectedSessionId) && !loaded?.summaryLoaded;
+
   useEffect(() => {
     if (!selectedSessionId) {
-      setEvents([]);
-      setIsLoadingEvents(false);
-      setAiSummary(null);
-      setIsLoadingSummary(false);
       return;
     }
 
     let cancelled = false;
-    setIsLoadingEvents(true);
-    setEvents([]);
-    setIsLoadingSummary(true);
-    setAiSummary(null);
+
+    function applyPatch(patch: Partial<SessionDetail>) {
+      if (cancelled) {
+        return;
+      }
+
+      setDetail((previous) =>
+        previous && previous.sessionId === selectedSessionId
+          ? { ...previous, ...patch }
+          : {
+              sessionId: selectedSessionId,
+              events: NO_EVENTS,
+              eventsLoaded: false,
+              summary: null,
+              summaryLoaded: false,
+              ...patch,
+            },
+      );
+    }
 
     getSessionRrwebEvents(selectedSessionId)
       .then((nextEvents) => {
-        if (!cancelled) {
-          setEvents(nextEvents);
-        }
+        applyPatch({ events: nextEvents, eventsLoaded: true });
       })
       .catch(() => {
-        if (!cancelled) {
-          setEvents([]);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsLoadingEvents(false);
-        }
+        applyPatch({ events: NO_EVENTS, eventsLoaded: true });
       });
 
     getOrCreateSessionSummary(selectedSessionId)
       .then((summary) => {
-        if (!cancelled) {
-          setAiSummary(summary);
-        }
+        applyPatch({ summary, summaryLoaded: true });
       })
       .catch(() => {
-        if (!cancelled) {
-          setAiSummary("Could not generate a summary right now.");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsLoadingSummary(false);
-        }
+        applyPatch({
+          summary: "Could not generate a summary right now.",
+          summaryLoaded: true,
+        });
       });
 
     return () => {

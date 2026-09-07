@@ -2,10 +2,47 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type ReactElement, type SVGProps } from "react";
+import {
+  useSyncExternalStore,
+  type ReactElement,
+  type SVGProps,
+} from "react";
 import { createClient } from "@/utils/supabase/client";
 
 const SIDEBAR_STORAGE_KEY = "sensa-sidebar-collapsed";
+
+const collapsedListeners = new Set<() => void>();
+
+function subscribeCollapsed(listener: () => void) {
+  collapsedListeners.add(listener);
+  return () => {
+    collapsedListeners.delete(listener);
+  };
+}
+
+function readCollapsed() {
+  try {
+    return sessionStorage.getItem(SIDEBAR_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+/** Server render and hydration always start expanded; storage applies after. */
+function readCollapsedOnServer() {
+  return false;
+}
+
+function writeCollapsed(next: boolean) {
+  try {
+    sessionStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
+  } catch {
+    // sessionStorage unavailable — collapse still applies for this render.
+  }
+  for (const listener of collapsedListeners) {
+    listener();
+  }
+}
 
 type NavItem = {
   href: string;
@@ -146,21 +183,14 @@ function navLinkClassName(isActive: boolean, collapsed: boolean) {
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [collapsed, setCollapsed] = useState(false);
-
-  useEffect(() => {
-    const stored = sessionStorage.getItem(SIDEBAR_STORAGE_KEY);
-    if (stored !== null) {
-      setCollapsed(stored === "true");
-    }
-  }, []);
+  const collapsed = useSyncExternalStore(
+    subscribeCollapsed,
+    readCollapsed,
+    readCollapsedOnServer,
+  );
 
   function toggleCollapsed() {
-    setCollapsed((previous) => {
-      const next = !previous;
-      sessionStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
-      return next;
-    });
+    writeCollapsed(!collapsed);
   }
 
   async function handleLogout() {

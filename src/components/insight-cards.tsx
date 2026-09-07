@@ -109,15 +109,9 @@ export function InsightCards({
 }) {
   const [visible, setVisible] = useState(false);
 
+  // Reduced motion is handled by each card's `motion-reduce:` classes, which
+  // render the final state immediately regardless of this flag.
   useEffect(() => {
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (reduceMotion) {
-      setVisible(true);
-      return;
-    }
-
     const frame = requestAnimationFrame(() => setVisible(true));
     return () => cancelAnimationFrame(frame);
   }, []);
