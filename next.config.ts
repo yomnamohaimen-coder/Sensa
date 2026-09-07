@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ["puppeteer"],
+  transpilePackages: ["rrweb-player"],
 };
 
 export default nextConfig;

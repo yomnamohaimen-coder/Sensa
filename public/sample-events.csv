@@ -1,0 +1,6 @@
+session_id,event_type,timestamp,page,device,metadata
+sess_001,page_view,2025-07-24T10:00:00Z,/search,desktop,{"query":"2 bed apartment"}
+sess_001,page_view,2025-07-24T10:01:10Z,/listing/42,desktop,{"listing_id":"42"}
+sess_001,click,2025-07-24T10:02:00Z,/listing/42,desktop,{"element":"contact_agent"}
+sess_002,page_view,2025-07-24T11:15:00Z,/home,mobile,{}
+sess_002,page_view,2025-07-24T11:16:20Z,/search,mobile,{"query":"studio"}

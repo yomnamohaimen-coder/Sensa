@@ -1,0 +1,73 @@
+import { calculateReportMetrics } from "@/lib/analytics/calculate-report-metrics";
+import type { CalculatedReportMetrics } from "@/lib/analytics/calculate-report-metrics";
+import type { DbReport } from "@/lib/events/schema";
+import { getReportEvents } from "@/lib/reports/get-report-events";
+import {
+  getReportHeatmapStats,
+  type ReportHeatmapStats,
+} from "@/lib/reports/get-report-heatmap-stats";
+
+export type ReportAiInsights = {
+  summary: string;
+  anomaly: string | null;
+  recommendation: string;
+};
+
+export type ReportDisplay = {
+  id: string;
+  label: string;
+  date: string;
+  dateISO: string;
+  metrics: CalculatedReportMetrics | null;
+  heatmapStats: ReportHeatmapStats;
+  aiInsights: ReportAiInsights | null;
+};
+
+function formatReportDate(isoDate: string): string {
+  return new Date(isoDate).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function formatReportLabel(isoDate: string): string {
+  return `Analysis — ${new Date(isoDate).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+  })}`;
+}
+
+function buildStoredAiInsights(report: DbReport): ReportAiInsights | null {
+  if (!report.ai_summary || !report.ai_recommendation) {
+    return null;
+  }
+
+  return {
+    summary: report.ai_summary,
+    anomaly: report.ai_anomaly,
+    recommendation: report.ai_recommendation,
+  };
+}
+
+export async function buildReportDisplay(report: DbReport): Promise<ReportDisplay> {
+  const events = await getReportEvents(report.id);
+  const metrics = calculateReportMetrics(events);
+  const heatmapStats = await getReportHeatmapStats(report.id);
+
+  return {
+    id: report.id,
+    label: formatReportLabel(report.created_at),
+    date: formatReportDate(report.created_at),
+    dateISO: report.created_at.slice(0, 10),
+    metrics,
+    heatmapStats,
+    aiInsights: buildStoredAiInsights(report),
+  };
+}
+
+export async function buildReportDisplays(
+  reports: DbReport[],
+): Promise<ReportDisplay[]> {
+  return Promise.all(reports.map(buildReportDisplay));
+}

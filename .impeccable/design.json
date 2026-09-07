@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-16T23:54:00.000Z",
+  "title": "Design System: Sensa",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "primary",
+        "displayName": "Ink",
+        "canonical": "#18181b",
+        "tonalRamp": [
+          "#09090b",
+          "#18181b",
+          "#27272a",
+          "#3f3f46",
+          "#52525b",
+          "#71717a",
+          "#a1a1aa",
+          "#fafafa"
+        ]
+      },
+      "paper-mist": {
+        "role": "neutral",
+        "displayName": "Paper Mist",
+        "canonical": "#fafafa",
+        "tonalRamp": [
+          "#e4e4e7",
+          "#f4f4f5",
+          "#fafafa",
+          "#ffffff",
+          "#ffffff",
+          "#ffffff",
+          "#ffffff",
+          "#ffffff"
+        ]
+      },
+      "signal-green": {
+        "role": "secondary",
+        "displayName": "Signal Green",
+        "canonical": "#059669",
+        "tonalRamp": [
+          "#022c22",
+          "#064e3b",
+          "#065f46",
+          "#047857",
+          "#059669",
+          "#10b981",
+          "#6ee7b7",
+          "#d1fae5"
+        ]
+      },
+      "deep-teal": {
+        "role": "primary",
+        "displayName": "Deep Teal",
+        "canonical": "#0f766e",
+        "tonalRamp": [
+          "#042f2e",
+          "#134e4a",
+          "#115e59",
+          "#0f766e",
+          "#0d9488",
+          "#2dd4bf",
+          "#5eead4",
+          "#ccfbf1"
+        ]
+      },
+      "mint-arc": {
+        "role": "primary",
+        "displayName": "Mint Arc",
+        "canonical": "#5eead4",
+        "tonalRamp": [
+          "#134e4a",
+          "#0f766e",
+          "#14b8a6",
+          "#2dd4bf",
+          "#5eead4",
+          "#99f6e4",
+          "#ccfbf1",
+          "#f0fdfa"
+        ]
+      },
+      "alert-red": {
+        "role": "tertiary",
+        "displayName": "Alert Red",
+        "canonical": "#b91c1c",
+        "tonalRamp": [
+          "#450a0a",
+          "#7f1d1d",
+          "#991b1b",
+          "#b91c1c",
+          "#dc2626",
+          "#f87171",
+          "#fecaca",
+          "#fef2f2"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#e4e4e7",
+        "tonalRamp": [
+          "#a1a1aa",
+          "#d4d4d8",
+          "#e4e4e7",
+          "#f4f4f5",
+          "#fafafa",
+          "#ffffff",
+          "#ffffff",
+          "#ffffff"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page titles and brand wordmark emphasis."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section headers within a page."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card and form section titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Primary UI copy, buttons, and field text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Metric labels, meta, and empty hints."
+      }
+    },
+    "shadows": [
+      {
+        "name": "card-rest",
+        "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        "purpose": "Default rest elevation for white cards and panels."
+      },
+      {
+        "name": "dialog-lift",
+        "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        "purpose": "Modals and confirmation dialogs only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "color-transition",
+        "value": "color 150ms ease, background-color 150ms ease, border-color 150ms ease",
+        "purpose": "Default interactive state transitions (Tailwind transition-colors)."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Default decisive action across forms and CTAs.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Upload CSV</button>",
+      "css": ".ds-btn-primary { background: #18181b; color: #ffffff; padding: 0.625rem 1.25rem; border: none; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background-color 150ms ease; } .ds-btn-primary:hover { background: #27272a; } .ds-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; } .ds-btn-primary:focus-visible { outline: 2px solid #71717a; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Cancel and low-emphasis actions beside primary.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Cancel</button>",
+      "css": ".ds-btn-secondary { background: #ffffff; color: #3f3f46; padding: 0.625rem 1rem; border: 1px solid #d4d4d8; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background-color 150ms ease; } .ds-btn-secondary:hover { background: #fafafa; } .ds-btn-secondary:focus-visible { outline: 2px solid #71717a; outline-offset: 2px; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Destructive account or irreversible actions.",
+      "html": "<button class=\"ds-btn-danger\" type=\"button\">Delete account</button>",
+      "css": ".ds-btn-danger { background: #b91c1c; color: #ffffff; padding: 0.5rem 1rem; border: none; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background-color 150ms ease; } .ds-btn-danger:hover { background: #991b1b; } .ds-btn-danger:focus-visible { outline: 2px solid #f87171; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Standard single-line field used across settings and auth.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Product name</span><input class=\"ds-input\" type=\"text\" placeholder=\"Your product or company name\" /></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 0.375rem; } .ds-field-label { font-size: 0.875rem; font-weight: 500; color: #3f3f46; } .ds-input { width: 100%; border: 1px solid #d4d4d8; border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; color: #18181b; background: #ffffff; outline: none; transition: border-color 150ms ease, box-shadow 150ms ease; } .ds-input::placeholder { color: #a1a1aa; } .ds-input:focus { border-color: #71717a; box-shadow: 0 0 0 1px #71717a; }"
+    },
+    {
+      "name": "Sidebar Nav",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Left rail brand + active/inactive destinations.",
+      "html": "<nav class=\"ds-nav\"><div class=\"ds-nav-brand\">Sensa</div><a class=\"ds-nav-item ds-nav-item-active\" href=\"#\">Dashboard</a><a class=\"ds-nav-item\" href=\"#\">Reports</a></nav>",
+      "css": ".ds-nav { width: 14rem; background: #ffffff; border-right: 1px solid #e4e4e7; padding: 1rem 0.75rem; font-family: ui-sans-serif, system-ui, sans-serif; } .ds-nav-brand { padding: 0 0.5rem 1rem; font-size: 1.125rem; font-weight: 600; letter-spacing: -0.025em; color: #18181b; } .ds-nav-item { display: block; border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; font-weight: 500; color: #52525b; text-decoration: none; } .ds-nav-item:hover { background: #fafafa; color: #18181b; } .ds-nav-item-active { background: #f4f4f5; color: #18181b; }"
+    },
+    {
+      "name": "Surface Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Default content panel for metrics, forms, and analysis blocks.",
+      "html": "<section class=\"ds-card\"><h3 class=\"ds-card-title\">Last analysis</h3><p class=\"ds-card-body\">Engagement increased 12% compared to previous report.</p></section>",
+      "css": ".ds-card { background: #ffffff; border: 1px solid #e4e4e7; border-radius: 0.5rem; padding: 1.25rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); } .ds-card-title { margin: 0; font-size: 0.875rem; font-weight: 500; color: #18181b; } .ds-card-body { margin: 0.75rem 0 0; font-size: 1rem; color: #27272a; }"
+    },
+    {
+      "name": "Empty Chart Placeholder",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Dashed empty state for charts and funnel previews.",
+      "html": "<div class=\"ds-empty-chart\" role=\"status\"><span class=\"ds-empty-chart-label\">Not enough funnel data yet</span></div>",
+      "css": ".ds-empty-chart { display: flex; align-items: center; justify-content: center; min-height: 5.5rem; width: 100%; border: 1px dashed #e4e4e7; border-radius: 0.375rem; background: rgb(250 250 250 / 0.5); padding: 0.75rem; } .ds-empty-chart-label { font-size: 0.75rem; line-height: 1.25rem; color: #a1a1aa; text-align: center; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Calm Instrument Panel",
+    "overview": "Sensa’s interface is a quiet tools surface for serious product decisions. It favors clarity, hierarchy, and trust over flourish. Screens read as a calm instrument panel: light zinc fields, dark ink for structure, and restrained chrome that stays out of the way of the narrative and the numbers.\n\nDensity is moderate and scannable—cards and sections give each job room without sprawling into dashboard noise. Color is rare and semantic. The system should feel like a professional analytics product a non-technical product owner can trust at a glance, never like a consumer app or a decorative marketing site.",
+    "keyCharacteristics": [
+      "Zinc-neutral shell with white cards on Paper Mist",
+      "Semibold, tight-tracking page titles; small muted labels",
+      "Color only for meaning (trends, conversion, danger)",
+      "Flat structure with hairline borders and soft card shadow",
+      "Refined, restrained controls—no playful chrome"
+    ],
+    "rules": [
+      {
+        "name": "The Meaning-Only Color Rule",
+        "body": "Decorative color is banned. Green / teal / red appear only when they encode meaning (positive trend, conversion, danger/error). Otherwise stay in zinc.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quiet Type Rule",
+        "body": "Do not introduce display serifs, gradient text, or oversized marketing headlines inside the authenticated product. Keep tracking tight only on large titles.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Surfaces are flat at rest. Do not stack multi-layer glow shadows or colored blurs on product chrome.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep authenticated screens on Paper Mist with white Hairline cards.",
+      "Do reserve Signal Green / Deep Teal / Mint Arc / Alert Red for semantic meaning only.",
+      "Do use one hero metric treatment (larger type, slightly stronger border) when a primary KPI leads the view.",
+      "Do prefer Geist Sans hierarchy already in use; keep page titles text-2xl font-semibold tracking-tight.",
+      "Do clear empty states with muted copy and dashed placeholders—not bare “—” as a fake number."
+    ],
+    "donts": [
+      "Don't introduce purple gradients, glow stacks, or consumer “delight” chrome into the product shell.",
+      "Don't use color as decoration on cards, nav, or backgrounds.",
+      "Don't treat globals.css dark-mode Arial defaults as product authority—follow the zinc Tailwind patterns in components.",
+      "Don't invent testimonials, marketing hero layouts, or playful illustration systems inside Operate surfaces.",
+      "Don't hardcode funnel stage labels in conversion visuals when metrics.funnel provides names."
+    ]
+  }
+}
